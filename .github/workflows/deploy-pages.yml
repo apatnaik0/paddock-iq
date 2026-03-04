@@ -2,19 +2,6 @@ name: Build and Deploy Pages
 
 on:
   workflow_dispatch:
-    inputs:
-      season:
-        description: "F1 season year"
-        required: true
-        default: "2026"
-      round:
-        description: "Round number"
-        required: true
-        default: "1"
-      quick:
-        description: "Use quick mode (true/false)"
-        required: true
-        default: "true"
   push:
     branches:
       - main
@@ -46,21 +33,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run pipeline
+      - name: Validate committed site output
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ "${{ github.event.inputs.quick }}" = "true" ]; then
-              python -m src.f1demo.pipeline \
-                --season "${{ github.event.inputs.season }}" \
-                --round "${{ github.event.inputs.round }}" \
-                --quick
-            else
-              python -m src.f1demo.pipeline \
-                --season "${{ github.event.inputs.season }}" \
-                --round "${{ github.event.inputs.round }}"
-            fi
-          else
-            python -m src.f1demo.pipeline --season 2026 --round 1 --quick
+          if [ ! -f "site/index.html" ]; then
+            echo "::error::site/index.html not found. Cannot deploy Pages artifact."
+            exit 1
           fi
 
       - name: Upload Pages artifact
