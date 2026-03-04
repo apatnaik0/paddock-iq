@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaddockIQ | Home</title>
+  <style>
+    :root {
+      --bg: #090c11;
+      --panel: #121720;
+      --line: #2b3647;
+      --ink: #edf3ff;
+      --muted: #9db0cc;
+      --accent: #4ea1ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 19px;
+      line-height: 1.45;
+      background: radial-gradient(circle at 15% 5%, #121b2a 0%, var(--bg) 48%, #07090d 100%);
+      color: var(--ink);
+    }
+    .wrap { max-width: 1420px; margin: 0 auto; padding: 22px 16px 52px; }
+    .hero {
+      background: linear-gradient(145deg, #141b28 0%, #0f141d 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .brand { margin: 0; color: #e9f2ff; font-size: 1.06rem; font-weight: 800; letter-spacing: 0.3px; }
+    h1 { margin: 0 0 6px; font-size: 2rem; letter-spacing: 0.2px; }
+    .muted { color: var(--muted); margin: 0; font-size: 1.08rem; }
+    .section-title { margin: 16px 2px 8px; color: #c8d9f2; font-size: 1.18rem; font-weight: 700; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 8px;
+    }
+    .race-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 12px;
+    }
+    .race-link {
+      display: block;
+      text-decoration: none;
+      border-radius: 10px;
+      border: 1px solid #33445f;
+      background: #0f141d;
+      padding: 12px;
+      color: #dfe8f7;
+    }
+    .race-link:hover { border-color: var(--accent); }
+    .race-title { margin: 0 0 4px; font-size: 1.14rem; color: #edf3ff; }
+    .race-sub { margin: 0; color: var(--muted); font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <p class="brand">PaddockIQ</p>
+      <h1>Race Hub</h1>
+      <p class="muted">Select a race weekend to open Overview, Weekend Analysis, and Strategy Lab.</p>
+    </section>
+
+    <p class="section-title">Current Race</p>
+    <section class="card">
+      
+      <a class="race-link" href="races/2026_round_01/index.html">
+        <p class="race-title">2026 Round 1 | Australian Grand Prix</p>
+        <p class="race-sub">Open current weekend pages</p>
+      </a>
+      
+    </section>
+
+    <p class="section-title">Available Races</p>
+    <section class="card">
+      
+      <div class="race-grid">
+        
+        <a class="race-link" href="races/2025_round_01/index.html">
+          <p class="race-title">2025 Round 1 | Australian Grand Prix</p>
+          <p class="race-sub">Open weekend pages</p>
+        </a>
+        
+      </div>
+      
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaddockIQ | 2026 Round 1 Strategy</title>
+  <style>
+    :root { --bg:#090c11; --panel:#121720; --line:#2b3647; --ink:#edf3ff; --muted:#9db0cc; --accent:#4ea1ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:"Avenir Next","Segoe UI",sans-serif; font-size:19px; line-height:1.45; background:radial-gradient(circle at 10% 10%, #11192a 0%, var(--bg) 42%, #07090d 100%); color:var(--ink); }
+    .wrap { max-width:1420px; margin:0 auto; padding:22px 16px 52px; }
+    .hero { background:linear-gradient(145deg,#141b28 0%,#0f141d 100%); border:1px solid var(--line); border-radius:14px; padding:14px; min-height:160px; display:flex; flex-direction:column; justify-content:center; }
+    .brand { margin:0; color:#e9f2ff; font-size:1.06rem; font-weight:800; letter-spacing:0.3px; }
+    h1 { margin:0 0 6px; font-size:2rem; letter-spacing:0.2px; }
+    .muted { color:var(--muted); margin:0; font-size:1.08rem; }
+    .topnav { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; }
+    .navbtn { color:#071222; background:var(--accent); border:1px solid var(--accent); border-radius:999px; text-decoration:none; font-weight:700; padding:8px 14px; }
+    .navbtn.inactive { color:#dfe8f7; background:#111a28; border-color:#31405a; }
+    .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; margin-top:12px; }
+    table { width:100%; border-collapse:collapse; font-size:1.02rem; }
+    th,td { text-align:left; border-bottom:1px solid #233043; padding:6px 4px; }
+    th { color:#bfd1ea; font-weight:600; }
+    td { color:#dfe8f7; }
+    .hl-list { margin:0; padding-left:20px; color:#dfe8f7; font-size:1.05rem; }
+    .hl-list li { margin:6px 0; }
+    .note { border:1px solid #31405a; background:#101828; padding:8px 10px; border-radius:8px; margin-top:10px; color:#d9e6fc; font-size:1.0rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <p class="brand">PaddockIQ</p>
+      <h1>Strategy Lab</h1>
+      <p class="muted">2026 Round 1 | Australian Grand Prix</p>
+      <nav class="topnav">
+        <a class="navbtn inactive" href="../../index.html">Race Hub</a>
+        <a class="navbtn inactive" href="index.html">Overview</a>
+        <a class="navbtn inactive" href="round.html">Weekend Analysis</a>
+        <a class="navbtn" href="strategy.html">Strategy Lab</a>
+      </nav>
+    </section>
+
+    <div class="note"><strong>Provisional Strategy Mode:</strong> No 2026 weekend session data is available yet. These windows and stop loads are historical priors from the last 5 Australian GP editions only.</div>
+
+    <section class="card">
+      <h3 style="margin:0 0 8px;">Historical Strategy Highlights</h3>
+      <ul class="hl-list">
+        <li>Earliest first-stop tendency: Mercedes (L6-L12); latest tendency: Red Bull Racing (L12-L18).</li>
+        <li>Highest expected stop load: Kick Sauber (3.5), lowest: Ferrari (2.1).</li>
+        <li>These are pre-weekend baseline assumptions and will be replaced by hybrid weekend+history outputs once FP/Quali/Race data exists.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h3 style="margin:0 0 8px;">Provisional Team Strategy Baseline</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Hist Avg Quali Pos</th><th>Expected Stops</th><th>Pit Window 1</th><th>Pit Window 2</th><th>Bias</th></tr></thead>
+        <tbody><tr><td>Ferrari</td><td>5.2</td><td>2.1</td><td>L10-L16</td><td>TBD</td><td>2-stop bias</td></tr>
+<tr><td>Mercedes</td><td>5.7</td><td>2.2</td><td>L6-L12</td><td>L30-L36</td><td>2-stop bias</td></tr>
+<tr><td>Red Bull Racing</td><td>7.2</td><td>2.3</td><td>L12-L18</td><td>L26-L32</td><td>2-stop bias</td></tr>
+<tr><td>McLaren</td><td>7.9</td><td>2.4</td><td>L10-L16</td><td>L38-L44</td><td>2-stop bias</td></tr>
+<tr><td>Racing Bulls</td><td>8.0</td><td>2.5</td><td>L6-L6</td><td>TBD</td><td>2-3 stop risk</td></tr>
+<tr><td>Aston Martin</td><td>11.5</td><td>2.62</td><td>L6-L10</td><td>L20-L26</td><td>2-3 stop risk</td></tr>
+<tr><td>Alpine</td><td>11.62</td><td>2.25</td><td>L7-L13</td><td>L28-L34</td><td>2-stop bias</td></tr>
+<tr><td>Haas F1 Team</td><td>13.8</td><td>2.3</td><td>L10-L16</td><td>L30-L36</td><td>2-stop bias</td></tr>
+<tr><td>Williams</td><td>14.22</td><td>2.3</td><td>L6-L10</td><td>L21-L27</td><td>2-stop bias</td></tr>
+<tr><td>Kick Sauber</td><td>16.0</td><td>3.5</td><td>L6-L8</td><td>L17-L23</td><td>2-3 stop risk</td></tr></tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

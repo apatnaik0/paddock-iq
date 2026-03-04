@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaddockIQ | Strategy Lab</title>
+  <style>
+    :root {
+      --bg: #090c11;
+      --panel: #121720;
+      --panel-2: #171f2b;
+      --ink: #edf3ff;
+      --muted: #9db0cc;
+      --line: #2b3647;
+      --accent: #4ea1ff;
+      --p1: #22c55e;
+      --p2: #f59e0b;
+      --p3: #ef4444;
+      --soft: #ff3b30;
+      --med: #f5c518;
+      --hard: #f3f4f6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 19px;
+      line-height: 1.45;
+      background: radial-gradient(circle at 10% 10%, #11192a 0%, var(--bg) 42%, #07090d 100%);
+      color: var(--ink);
+    }
+    .wrap { max-width: 1420px; margin: 0 auto; padding: 22px 16px 52px; }
+    .hero {
+      background: linear-gradient(145deg, #141b28 0%, #0f141d 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .brand { margin: 0; color: #e9f2ff; font-size: 1.06rem; font-weight: 800; letter-spacing: 0.3px; }
+    h1 { margin: 0 0 6px; font-size: 2rem; letter-spacing: 0.2px; }
+    .muted { color: var(--muted); margin: 0; font-size: 1.08rem; }
+    .topnav { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .navbtn {
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 8px 14px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #071222;
+    }
+    .navbtn.inactive {
+      color: #dfe8f7;
+      background: #111a28;
+      border-color: #31405a;
+    }
+    .section { margin-top: 12px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .card h3 { margin: 0 0 8px; font-size: 1.16rem; }
+    .hint { color: var(--muted); margin: 0 0 10px; font-size: 1.02rem; }
+    .insight-box {
+      margin-top: 10px;
+      border: 1px solid #243245;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #0f141d;
+    }
+    .insight-title {
+      color: #c4d3ea;
+      font-size: 1.04rem;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+    .insight-box ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #d7e3f6;
+      font-size: 1rem;
+    }
+    .row { display: grid; grid-template-columns: 120px 1fr 80px; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .name { color: #dce8f9; font-weight: 600; font-size: 1.04rem; }
+    .value { color: #c7d5ec; text-align: right; font-size: 1.0rem; }
+    .stack {
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #31405a;
+      background: #0d141f;
+      display: flex;
+    }
+    .seg1 { background: var(--p1); }
+    .seg2 { background: var(--p2); }
+    .seg3 { background: var(--p3); }
+
+    .lane {
+      width: 100%;
+      height: 30px;
+      border-radius: 6px;
+      position: relative;
+      background: linear-gradient(90deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 8.3333%);
+      background-color: #0d141f;
+      border: 1px solid #31405a;
+      overflow: hidden;
+    }
+    .compound-seg {
+      position: absolute;
+      top: 0;
+      height: 100%;
+    }
+    .comp-soft { background: #ff3b30; }
+    .comp-medium { background: #f5c518; }
+    .comp-hard { background: #f3f4f6; }
+    .comp-intermediate { background: #16a34a; }
+    .comp-wet { background: #2563eb; }
+    .comp-unknown { background: #6b7280; }
+    .pitwin {
+      position: absolute;
+      top: 2px;
+      height: calc(100% - 4px);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f8fbff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      white-space: nowrap;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.95);
+      border: 1px dashed rgba(255, 255, 255, 0.9);
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(10, 14, 22, 0.72) 0px,
+        rgba(10, 14, 22, 0.72) 6px,
+        rgba(255, 255, 255, 0.12) 6px,
+        rgba(255, 255, 255, 0.12) 12px
+      );
+    }
+
+    .pacebar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #0d141f;
+      border: 1px solid #31405a;
+      overflow: hidden;
+      margin: 2px 0;
+    }
+    .soft { background: var(--soft); height: 100%; }
+    .med { background: var(--med); height: 100%; }
+    .hard { background: var(--hard); height: 100%; }
+    .pit-team-block {
+      border: 1px solid #273246;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #0f141d;
+    }
+    .pit-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .pit-team-name {
+      color: #dce8f9;
+      font-weight: 700;
+      font-size: 0.98rem;
+    }
+    .pit-exp {
+      color: #dfe8f7;
+      font-size: 1rem;
+      background: #182235;
+      border: 1px solid #31405a;
+      border-radius: 999px;
+      padding: 3px 10px;
+    }
+    .window-labels {
+      margin-top: 6px;
+      color: #c7d5ec;
+      font-size: 0.96rem;
+      line-height: 1.5;
+    }
+    .window-labels span { display: block; }
+    .lap-scale {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      color: #c7d5ec;
+      font-size: 1.02rem;
+      margin: 4px 0 10px;
+      gap: 0;
+    }
+    .lap-scale span { text-align: center; }
+    .lap-axis-wrap {
+      margin-left: 120px;
+      margin-right: 8px;
+    }
+    .compound-team {
+      border: 1px solid #273246;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #0f141d;
+    }
+    .compound-team-head {
+      color: #dce8f9;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 1.04rem;
+    }
+    .compound-row {
+      display: grid;
+      grid-template-columns: 66px 1fr 96px;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .compound-label {
+      color: #c7d5ec;
+      font-size: 0.96rem;
+      font-weight: 600;
+    }
+    .compound-value {
+      color: #c7d5ec;
+      font-size: 0.94rem;
+      text-align: right;
+    }
+    .compound-legend {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+    .swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      margin-right: 6px;
+      vertical-align: -1px;
+    }
+    .soft-swatch { background: var(--soft); }
+    .med-swatch { background: var(--med); }
+    .hard-swatch { background: var(--hard); border: 1px solid #9ba8bf; }
+    .edge-card {
+      border: 1px solid #273246;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #0f141d;
+    }
+    .edge-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .edge-team {
+      color: #dce8f9;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .edge-call {
+      color: #dfe8f7;
+      font-size: 0.94rem;
+      background: #182235;
+      border: 1px solid #31405a;
+      border-radius: 999px;
+      padding: 3px 10px;
+    }
+    .edge-row {
+      display: grid;
+      grid-template-columns: 72px 1fr 72px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .edge-label {
+      color: #c7d5ec;
+      font-size: 0.96rem;
+      font-weight: 600;
+    }
+    .edge-track {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      border: 1px solid #31405a;
+      background: #0d141f;
+      overflow: hidden;
+    }
+    .edge-undercut { height: 100%; background: #4ea1ff; }
+    .edge-overcut { height: 100%; background: #f59e0b; }
+    .edge-aggr { height: 100%; background: #ef4444; }
+    .edge-def { height: 100%; background: #22c55e; }
+    .edge-value {
+      color: #c7d5ec;
+      font-size: 0.94rem;
+      text-align: right;
+    }
+    .edge-note {
+      color: #9db0cc;
+      font-size: 0.94rem;
+      margin-top: 4px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 1.08rem; }
+    th, td { text-align: left; border-bottom: 1px solid #233043; padding: 6px 4px; }
+    th { color: #bfd1ea; font-weight: 600; }
+    td { color: #dfe8f7; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <p class="brand">PaddockIQ</p>
+      <h1>Strategy Lab</h1>
+      <p class="muted">{{ season }} Round {{ round_number }} | {{ event_name }}</p>
+      <nav class="topnav">
+        <a class="navbtn inactive" href="../../index.html">Race Hub</a>
+        <a class="navbtn inactive" href="index.html">Overview</a>
+        <a class="navbtn inactive" href="round.html">Weekend Analysis</a>
+        <a class="navbtn" href="strategy.html">Strategy Lab</a>
+      </nav>
+    </section>
+
+    <section class="section card">
+      <p class="muted">Race laps considered: {{ strategy_total_laps }}</p>
+      <p class="muted">Data basis: current weekend sessions (primary signal) + previous same-GP editions (secondary context).</p>
+      {% if strategy_hybrid_meta and strategy_hybrid_meta.enabled %}
+      <p class="muted">
+        Hybrid strategy model active |
+        ML train set: {{ strategy_hybrid_meta.train_season }}
+        {% if strategy_hybrid_meta.train_events %}
+        {{ strategy_hybrid_meta.train_events|join(", ") }}
+        {% elif strategy_hybrid_meta.train_rounds %}
+        R{{ strategy_hybrid_meta.train_rounds|join(", R") }}
+        {% else %}
+        R1-R{{ strategy_hybrid_meta.train_round_end }}
+        {% endif %}
+        ({{ strategy_hybrid_meta.rows }} team-rounds)
+      </p>
+      {% else %}
+      <p class="muted">Hybrid strategy fallback: ML unavailable, heuristic baseline active.</p>
+      {% endif %}
+    </section>
+
+    <section class="section card">
+      <h3>Pit Window + Stop Load Map</h3>
+      <p class="hint">Pit windows and expected stop load by team.</p>
+      {% if strategy_total_laps > 0 %}
+      <div class="lap-axis-wrap">
+        <div class="lap-scale">
+          <span>L1</span>
+          <span>L{{ (strategy_total_laps * 1 / 6)|round|int }}</span>
+          <span>L{{ (strategy_total_laps * 2 / 6)|round|int }}</span>
+          <span>L{{ (strategy_total_laps * 3 / 6)|round|int }}</span>
+          <span>L{{ (strategy_total_laps * 4 / 6)|round|int }}</span>
+          <span>L{{ (strategy_total_laps * 5 / 6)|round|int }}</span>
+          <span>L{{ strategy_total_laps }}</span>
+        </div>
+      </div>
+      {% endif %}
+      {% for row in strategy_rows %}
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">{{ row.Team }}</span>
+          <span class="pit-exp">Expected Stops: {{ row.expected_stops }}</span>
+        </div>
+        {% set start_comp = (row.start_compound if row.start_compound else 'UNKNOWN') %}
+        {% set mid_comp = (row.post_pit1_compound if row.post_pit1_compound else start_comp) %}
+        {% set end_comp = (row.post_pit2_compound if row.post_pit2_compound else mid_comp) %}
+        {% set c_start = 'comp-unknown' %}
+        {% set c_mid = 'comp-unknown' %}
+        {% set c_end = 'comp-unknown' %}
+        {% if start_comp == 'SOFT' %}{% set c_start = 'comp-soft' %}{% endif %}
+        {% if start_comp == 'MEDIUM' %}{% set c_start = 'comp-medium' %}{% endif %}
+        {% if start_comp == 'HARD' %}{% set c_start = 'comp-hard' %}{% endif %}
+        {% if start_comp == 'INTERMEDIATE' %}{% set c_start = 'comp-intermediate' %}{% endif %}
+        {% if start_comp == 'WET' %}{% set c_start = 'comp-wet' %}{% endif %}
+        {% if mid_comp == 'SOFT' %}{% set c_mid = 'comp-soft' %}{% endif %}
+        {% if mid_comp == 'MEDIUM' %}{% set c_mid = 'comp-medium' %}{% endif %}
+        {% if mid_comp == 'HARD' %}{% set c_mid = 'comp-hard' %}{% endif %}
+        {% if mid_comp == 'INTERMEDIATE' %}{% set c_mid = 'comp-intermediate' %}{% endif %}
+        {% if mid_comp == 'WET' %}{% set c_mid = 'comp-wet' %}{% endif %}
+        {% if end_comp == 'SOFT' %}{% set c_end = 'comp-soft' %}{% endif %}
+        {% if end_comp == 'MEDIUM' %}{% set c_end = 'comp-medium' %}{% endif %}
+        {% if end_comp == 'HARD' %}{% set c_end = 'comp-hard' %}{% endif %}
+        {% if end_comp == 'INTERMEDIATE' %}{% set c_end = 'comp-intermediate' %}{% endif %}
+        {% if end_comp == 'WET' %}{% set c_end = 'comp-wet' %}{% endif %}
+
+        {% set p1s = row.pit1_start if row.pit1_start is not none else none %}
+        {% set p1e = row.pit1_end if row.pit1_end is not none else none %}
+        {% set p2s = row.pit2_start if row.pit2_start is not none else none %}
+        {% set p2e = row.pit2_end if row.pit2_end is not none else none %}
+
+        <div class="lane" style="margin-top: 6px;">
+          {% if strategy_total_laps > 0 and p1s is not none and p1e is not none %}
+            {% set seg1_left = 0 %}
+            {% set seg1_w = ((((p1s - 1) / strategy_total_laps) * 100) if (p1s - 1) > 0 else 0) %}
+            <div class="compound-seg {{ c_start }}" style="left: {{ seg1_left|round(2) }}%; width: {{ seg1_w|round(2) }}%;"></div>
+
+            {% set win1_left = (((p1s - 1) / strategy_total_laps) * 100) %}
+            {% set win1_w = (((p1e - p1s + 1) / strategy_total_laps) * 100) %}
+            <div class="pitwin" style="left: {{ win1_left|round(2) }}%; width: {{ win1_w|round(2) }}%;">
+              {{ row.pit1_transition }}
+            </div>
+
+            {% if p2s is not none and p2e is not none %}
+              {% set seg2_left = ((p1e / strategy_total_laps) * 100) %}
+              {% set seg2_laps = (p2s - p1e - 1) %}
+              {% set seg2_w = (((seg2_laps / strategy_total_laps) * 100) if seg2_laps > 0 else 0) %}
+              <div class="compound-seg {{ c_mid }}" style="left: {{ seg2_left|round(2) }}%; width: {{ seg2_w|round(2) }}%;"></div>
+
+              {% set win2_left = (((p2s - 1) / strategy_total_laps) * 100) %}
+              {% set win2_w = (((p2e - p2s + 1) / strategy_total_laps) * 100) %}
+              <div class="pitwin" style="left: {{ win2_left|round(2) }}%; width: {{ win2_w|round(2) }}%;">
+                {{ row.pit2_transition }}
+              </div>
+
+              {% set seg3_left = ((p2e / strategy_total_laps) * 100) %}
+              {% set seg3_laps = (strategy_total_laps - p2e) %}
+              {% set seg3_w = (((seg3_laps / strategy_total_laps) * 100) if seg3_laps > 0 else 0) %}
+              <div class="compound-seg {{ c_end }}" style="left: {{ seg3_left|round(2) }}%; width: {{ seg3_w|round(2) }}%;"></div>
+            {% else %}
+              {% set seg2_left = ((p1e / strategy_total_laps) * 100) %}
+              {% set seg2_laps = (strategy_total_laps - p1e) %}
+              {% set seg2_w = (((seg2_laps / strategy_total_laps) * 100) if seg2_laps > 0 else 0) %}
+              <div class="compound-seg {{ c_mid }}" style="left: {{ seg2_left|round(2) }}%; width: {{ seg2_w|round(2) }}%;"></div>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: {{ row.pit_window_1 if row.pit_window_1 else "-" }}</span>
+          <span>Stop 2 Window: {{ row.pit_window_2 if row.pit_window_2 else "-" }}</span>
+        </div>
+      </article>
+      {% endfor %}
+      <div class="insight-box">
+        <p class="insight-title">Highlights</p>
+        <ul>
+          {% for point in (strategy_highlights.pit_windows if strategy_highlights and strategy_highlights.pit_windows else []) %}
+          <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h3>Team Strategy + Pit Stop Forecast</h3>
+      <table>
+        <thead>
+          <tr><th>Team</th><th>Expected Stops</th><th>P(1)</th><th>P(2)</th><th>P(3+)</th><th>Strategy</th><th>Pit Window 1</th><th>Pit1 Tyre</th><th>Pit Window 2</th><th>Pit2 Tyre</th></tr>
+        </thead>
+        <tbody>
+          {% for row in strategy_rows %}
+          <tr>
+            <td>{{ row.Team }}</td>
+            <td>{{ row.expected_stops }}</td>
+            <td>{{ row.p_1_stop }}%</td>
+            <td>{{ row.p_2_stop }}%</td>
+            <td>{{ row.p_3_stop }}%</td>
+            <td>{{ row.strategy }}</td>
+            <td>{{ row.pit_window_1 }}</td>
+            <td>{{ row.pit1_transition if row.pit1_transition else "-" }}</td>
+            <td>{{ row.pit_window_2 }}</td>
+            <td>{{ row.pit2_transition if row.pit2_transition else "-" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h3>Undercut vs Overcut Edge Map</h3>
+      <p class="hint">Tactical edge view with trigger timing and viability scores.</p>
+      {% for row in undercut_rows %}
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">{{ row.Team }}</span>
+          <span class="edge-call">{{ row.preferred_call }}</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: {{ (row.undercut_gain_s / (strategy_edge_max if strategy_edge_max > 0 else 1) * 100)|round(1) }}%;"></div></div>
+          <span class="edge-value">{{ "%.3f"|format(row.undercut_gain_s) }} s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: {{ (row.overcut_gain_s / (strategy_edge_max if strategy_edge_max > 0 else 1) * 100)|round(1) }}%;"></div></div>
+          <span class="edge-value">{{ "%.3f"|format(row.overcut_gain_s) }} s</span>
+        </div>
+        <p class="edge-note">Trigger: {{ row.pit_trigger_window }}{% if row.trigger_lap %} (center L{{ row.trigger_lap }}){% endif %} | Viability U/O: {{ row.undercut_viability_pct }}% / {{ row.overcut_viability_pct }}%</p>
+      </article>
+      {% endfor %}
+      <div class="insight-box">
+        <p class="insight-title">Highlights</p>
+        <ul>
+          {% for point in (strategy_highlights.undercut_overcut if strategy_highlights and strategy_highlights.undercut_overcut else []) %}
+          <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h3>Undercut / Overcut Strategy Table</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Preferred Call</th><th>Trigger Window</th><th>Trigger Lap</th><th>Undercut Gain (s)</th><th>Overcut Gain (s)</th><th>Viability U/O</th></tr></thead>
+        <tbody>
+          {% for row in undercut_rows %}
+          <tr>
+            <td>{{ row.Team }}</td>
+            <td>{{ row.preferred_call }}</td>
+            <td>{{ row.pit_trigger_window }}</td>
+            <td>{% if row.trigger_lap %}L{{ row.trigger_lap }}{% else %}-{% endif %}</td>
+            <td>{{ "%.3f"|format(row.undercut_gain_s) }}</td>
+            <td>{{ "%.3f"|format(row.overcut_gain_s) }}</td>
+            <td>{{ row.undercut_viability_pct }}% / {{ row.overcut_viability_pct }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h3>Stint Extension Decision Map</h3>
+      <p class="hint">Extension recommendation for the opening stint around the first pit window.</p>
+      {% for row in stint_extension_rows %}
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">{{ row.Team }}</span>
+          <span class="edge-call">{{ row.extension_call }}</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: {{ row.extension_viability_pct }}%;"></div></div>
+          <span class="edge-value">{{ row.extension_viability_pct }}%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: {{ ((row.expected_penalty_s / 0.8) * 100)|round(1) }}%;"></div></div>
+          <span class="edge-value">{{ "%.3f"|format(row.expected_penalty_s) }} s</span>
+        </div>
+        <p class="edge-note">{{ row.stint_compound }} stint | Extend up to +{{ row.max_extend_laps }} laps | Window {{ row.pit_window }}</p>
+      </article>
+      {% endfor %}
+      <div class="insight-box">
+        <p class="insight-title">Highlights</p>
+        <ul>
+          {% for point in (strategy_highlights.stint_extension if strategy_highlights and strategy_highlights.stint_extension else []) %}
+          <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h3>Stint Extension Table</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Stint Tyre</th><th>Pit Window</th><th>Max Extend (laps)</th><th>Penalty (s)</th><th>Viability</th><th>Call</th></tr></thead>
+        <tbody>
+          {% for row in stint_extension_rows %}
+          <tr>
+            <td>{{ row.Team }}</td>
+            <td>{{ row.stint_compound }}</td>
+            <td>{{ row.pit_window }}</td>
+            <td>{{ row.max_extend_laps }}</td>
+            <td>{{ "%.3f"|format(row.expected_penalty_s) }}</td>
+            <td>{{ row.extension_viability_pct }}%</td>
+            <td>{{ row.extension_call }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h3>Defensive vs Aggressive Mode Map</h3>
+      <p class="hint">Race-mode profile based on tactical edge, degradation and stop model.</p>
+      {% for row in race_mode_rows %}
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">{{ row.Team }}</span>
+          <span class="edge-call">{{ row.mode }}</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: {{ row.aggressive_score_pct }}%;"></div></div>
+          <span class="edge-value">{{ row.aggressive_score_pct }}%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: {{ row.defensive_score_pct }}%;"></div></div>
+          <span class="edge-value">{{ row.defensive_score_pct }}%</span>
+        </div>
+        <p class="edge-note">Primary trigger {{ row.primary_trigger }} | {{ row.mode_hint }}</p>
+      </article>
+      {% endfor %}
+      <div class="insight-box">
+        <p class="insight-title">Highlights</p>
+        <ul>
+          {% for point in (strategy_highlights.race_mode if strategy_highlights and strategy_highlights.race_mode else []) %}
+          <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h3>Race Mode Table</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Mode</th><th>Aggressive</th><th>Defensive</th><th>Primary Trigger</th><th>Guidance</th></tr></thead>
+        <tbody>
+          {% for row in race_mode_rows %}
+          <tr>
+            <td>{{ row.Team }}</td>
+            <td>{{ row.mode }}</td>
+            <td>{{ row.aggressive_score_pct }}%</td>
+            <td>{{ row.defensive_score_pct }}%</td>
+            <td>{{ row.primary_trigger }}</td>
+            <td>{{ row.mode_hint }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h3>Compound Pace Delta Visual</h3>
+      <p class="hint">Bar length shows pace deficit to each team's fastest compound projection (s).</p>
+      <div class="compound-legend">
+        <span><span class="swatch soft-swatch"></span>Soft</span>
+        <span><span class="swatch med-swatch"></span>Medium</span>
+        <span><span class="swatch hard-swatch"></span>Hard</span>
+      </div>
+      {% for row in stint_pace_rows %}
+      <article class="compound-team">
+        <div class="compound-team-head">{{ row.Team }}</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: {{ (row.soft_delta_ms / (strategy_pace_delta_max if strategy_pace_delta_max > 0 else 1) * 100)|round(1) }}%"></div></div>
+          <span class="compound-value">{{ "%.3f"|format(row.soft_delta_ms / 1000.0) }} s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: {{ (row.medium_delta_ms / (strategy_pace_delta_max if strategy_pace_delta_max > 0 else 1) * 100)|round(1) }}%"></div></div>
+          <span class="compound-value">{{ "%.3f"|format(row.medium_delta_ms / 1000.0) }} s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: {{ (row.hard_delta_ms / (strategy_pace_delta_max if strategy_pace_delta_max > 0 else 1) * 100)|round(1) }}%"></div></div>
+          <span class="compound-value">{{ "%.3f"|format(row.hard_delta_ms / 1000.0) }} s</span>
+        </div>
+      </article>
+      {% endfor %}
+      <div class="insight-box">
+        <p class="insight-title">Highlights</p>
+        <ul>
+          {% for point in (strategy_highlights.compound_pace if strategy_highlights and strategy_highlights.compound_pace else []) %}
+          <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h3>Team Stint Pace By Compound</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Soft Pace</th><th>Medium Pace</th><th>Hard Pace</th></tr></thead>
+        <tbody>
+          {% for row in stint_pace_rows %}
+          <tr><td>{{ row.Team }}</td><td>{{ row.soft_pace_fmt }}</td><td>{{ row.medium_pace_fmt }}</td><td>{{ row.hard_pace_fmt }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h3>Team Degradation Outlook</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Mean Deg (s/lap)</th><th>Avg Expected Stops</th></tr></thead>
+        <tbody>
+          {% for row in team_outlook_rows %}
+          <tr><td>{{ row.Team }}</td><td>{{ row.mean_deg_s_per_lap }}</td><td>{{ row.avg_expected_stops }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </div>
+  {% if ga4_measurement_id %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga4_measurement_id }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', '{{ ga4_measurement_id }}', { 'anonymize_ip': true });
+
+    (function () {
+      const startedAt = Date.now();
+      function flushPageTime() {
+        const secs = (Date.now() - startedAt) / 1000;
+        if (secs < 1) return;
+        gtag('event', 'tab_time', {
+          tab_group: 'page',
+          tab_name: 'Strategy Lab',
+          time_seconds: Number(secs.toFixed(1)),
+          season: {{ season }},
+          round: {{ round_number }},
+          event_name: '{{ event_name|e }}'
+        });
+      }
+      window.addEventListener('beforeunload', flushPageTime);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') flushPageTime();
+      });
+    })();
+  </script>
+  {% endif %}
+</body>
+</html>

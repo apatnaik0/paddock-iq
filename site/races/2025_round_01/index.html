@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaddockIQ | 2025 Round 1</title>
+  <style>
+    :root {
+      --bg: #090c11;
+      --panel: #121720;
+      --panel-2: #171f2b;
+      --ink: #edf3ff;
+      --muted: #9db0cc;
+      --line: #2b3647;
+      --accent: #4ea1ff;
+      --accent-2: #22c55e;
+      --accent-3: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 19px;
+      line-height: 1.45;
+      background: radial-gradient(circle at 14% 8%, #11192a 0%, var(--bg) 46%, #07090d 100%);
+      color: var(--ink);
+    }
+    .wrap { max-width: 1420px; margin: 0 auto; padding: 22px 16px 52px; }
+    .hero {
+      background: linear-gradient(145deg, #141b28 0%, #0f141d 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .brand { margin: 0; color: #e9f2ff; font-size: 1.06rem; font-weight: 800; letter-spacing: 0.3px; }
+    h1 { margin: 0 0 6px; font-size: 2rem; letter-spacing: 0.2px; }
+    .muted { color: var(--muted); margin: 0; font-size: 1.08rem; }
+    .topnav { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .navbtn {
+      color: #071222;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 8px 14px;
+    }
+    .navbtn.inactive {
+      color: #dfe8f7;
+      background: #111a28;
+      border-color: #31405a;
+    }
+    .section-title { margin: 18px 2px 8px; color: #c8d9f2; font-size: 1.18rem; font-weight: 700; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 1200px) {
+      .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    }
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .card h3 { margin: 0 0 10px; font-size: 1.16rem; }
+    .kpi {
+      font-size: 1.62rem;
+      font-weight: 800;
+      color: #e9f2ff;
+      margin: 0 0 2px;
+    }
+    .kpi-sub {
+      font-size: 1.02rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 1.08rem; }
+    th, td { text-align: left; border-bottom: 1px solid #233043; padding: 6px 4px; }
+    th { color: #bfd1ea; font-weight: 600; }
+    td { color: #dfe8f7; }
+    .num { color: var(--accent); font-weight: 700; }
+    .pos { color: var(--accent-2); font-weight: 600; }
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #30405a;
+      background: #101828;
+      color: #d7e5fc;
+      margin-right: 6px;
+      font-size: 0.96rem;
+    }
+    .hl-list { margin: 0; padding-left: 20px; color: #dfe8f7; font-size: 1.05rem; }
+    .hl-list li { margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    
+    <section class="hero">
+      <p class="brand">PaddockIQ</p>
+      <h1>Overview</h1>
+      <p class="muted">2025 Round 1 | Australian Grand Prix</p>
+      <div class="topnav">
+        <a class="navbtn inactive" href="../../index.html">Race Hub</a>
+        <a class="navbtn" href="index.html">Overview</a>
+        <a class="navbtn inactive" href="round.html">Weekend Analysis</a>
+        <a class="navbtn inactive" href="strategy.html">Strategy Lab</a>
+      </div>
+    </section>
+    <p class="muted" style="margin:8px 2px 0;">Historical basis: last 5 races at this round/circuit slot</p>
+
+    <p class="section-title">Circuit Profile</p>
+    <section class="grid">
+      <article class="card">
+        <h3>Turns</h3>
+        <p class="kpi">14</p>
+        <p class="kpi-sub">Unique numbered corners</p>
+      </article>
+      <article class="card">
+        <h3>Gear Changes / Lap</h3>
+        <p class="kpi">29</p>
+        <p class="kpi-sub">From fastest qualifying lap telemetry</p>
+      </article>
+      <article class="card">
+        <h3>Weekend Fastest Lap</h3>
+        <p class="kpi" style="font-size:1.22rem;">1:15.096 (NOR)</p>
+        <p class="kpi-sub">Qualifying pole lap reference</p>
+      </article>
+      <article class="card">
+        <h3>Historical Fastest Lap</h3>
+        <p class="kpi" style="font-size:1.22rem;">1:15.915 (VER - 2024)</p>
+        <p class="kpi-sub">Last 5 races at this slot</p>
+      </article>
+      <article class="card">
+        <h3>Average Pit Stops</h3>
+        <p class="kpi">1.28</p>
+        <p class="kpi-sub">Per driver, historical average</p>
+      </article>
+      <article class="card">
+        <h3>SC / VSC Likelihood</h3>
+        <p class="kpi">80.0%</p>
+        <p class="kpi-sub">SC: 60.0% | VSC: 80.0%</p>
+      </article>
+      <article class="card">
+        <h3>Pit Time Saved Under SC</h3>
+        <p class="kpi">-25.74 s</p>
+        <p class="kpi-sub">Historical pit-lap loss reduction proxy</p>
+      </article>
+      <article class="card">
+        <h3>Pit Time Saved Under VSC</h3>
+        <p class="kpi">-15.83 s</p>
+        <p class="kpi-sub">Historical pit-lap loss reduction proxy</p>
+      </article>
+      <article class="card">
+        <h3>Average Pitstop Time</h3>
+        <p class="kpi">20.56 s</p>
+        <p class="kpi-sub">Pit-in to pit-out average over same-GP history</p>
+      </article>
+      <article class="card">
+        <h3>Best Driver (Car-Adjusted)</h3>
+        <p class="kpi" style="font-size:1.22rem;">HUL</p>
+        <p class="kpi-sub">
+          
+          3.25 pos vs team avg (4 races)
+          
+        </p>
+      </article>
+    </section>
+
+    <section class="card" style="margin-top:12px;">
+      <h3>Circuit Highlights</h3>
+      <ul class="hl-list">
+        <li><strong>Key Overtake Zones:</strong> T3 braking zone after the DRS straight is the primary passing opportunity. T11 can create late-braking moves when exit from the previous sector is strong. T1 first-lap compression frequently opens opportunistic side-by-side entries.</li>
+        <li><strong>Ideal Driver Characteristics:</strong> Strong confidence in high-speed direction changes to maximize final-sector commitment. Precise trail-braking into medium-speed corners to protect front tyres over stints. Consistent traction management on corner exits to defend and attack effectively under DRS.</li>
+        <li><strong>Ideal Car Characteristics:</strong> Balanced low-drag efficiency for long straights without giving up mid-speed platform stability. Strong front-end response for quick rotation through linked corner sequences. Stable kerb behavior and rear traction to protect tyre life across long runs.</li>
+        <li><strong>Track Evolution:</strong> Track evolution is usually significant across the weekend as rubber builds on a semi-street surface. Early sessions can be grip-limited and noisy, so FP long-run trends are often more reliable than single-lap headlines. Late-session pace spikes in qualifying are common as temperature and grip windows align.</li>
+        <li><strong>Race Control Context:</strong> SC 60.0% and VSC 80.0%; average pit-lane time is 20.56s.</li>
+      </ul>
+    </section>
+
+    <p class="section-title">Previous Winners</p>
+    <section class="card">
+      
+      <table>
+        <thead><tr><th>Season</th><th>Winner</th><th>Team</th></tr></thead>
+        <tbody>
+          
+          <tr><td>2024</td><td>SAI</td><td>Ferrari</td></tr>
+          
+          <tr><td>2023</td><td>VER</td><td>Red Bull Racing</td></tr>
+          
+          <tr><td>2022</td><td>LEC</td><td>Ferrari</td></tr>
+          
+          <tr><td>2019</td><td>BOT</td><td>Mercedes</td></tr>
+          
+          <tr><td>2018</td><td>VET</td><td>Ferrari</td></tr>
+          
+        </tbody>
+      </table>
+      
+    </section>
+
+    <p class="section-title">Predictions</p>
+    <section class="grid-two">
+      <article class="card">
+        <h3>Qualifying Prediction</h3>
+        <p class="kpi-sub">
+          <span class="pill">Uses weekend pace + prior-year driver/team quali form + same-circuit boost</span>
+        </p>
+        <table>
+          <thead><tr><th>Driver</th><th>Pred</th><th>Actual</th></tr></thead>
+          <tbody>
+            
+            <tr>
+              <td>LEC</td>
+              <td class="num">1</td>
+              <td class="pos">7.0</td>
+            </tr>
+            
+            <tr>
+              <td>VER</td>
+              <td class="num">2</td>
+              <td class="pos">3.0</td>
+            </tr>
+            
+            <tr>
+              <td>RUS</td>
+              <td class="num">3</td>
+              <td class="pos">4.0</td>
+            </tr>
+            
+            <tr>
+              <td>PIA</td>
+              <td class="num">4</td>
+              <td class="pos">2.0</td>
+            </tr>
+            
+            <tr>
+              <td>NOR</td>
+              <td class="num">5</td>
+              <td class="pos">1.0</td>
+            </tr>
+            
+            <tr>
+              <td>STR</td>
+              <td class="num">6</td>
+              <td class="pos">13.0</td>
+            </tr>
+            
+            <tr>
+              <td>LAW</td>
+              <td class="num">7</td>
+              <td class="pos">18.0</td>
+            </tr>
+            
+            <tr>
+              <td>TSU</td>
+              <td class="num">8</td>
+              <td class="pos">5.0</td>
+            </tr>
+            
+            <tr>
+              <td>HAM</td>
+              <td class="num">9</td>
+              <td class="pos">8.0</td>
+            </tr>
+            
+            <tr>
+              <td>ANT</td>
+              <td class="num">10</td>
+              <td class="pos">16.0</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </article>
+
+      <article class="card">
+        <h3>Race Prediction</h3>
+        <p class="kpi-sub">
+          <span class="pill">Uses weekend pace + qualifying + prior-year driver/team race form + same-circuit boost</span>
+        </p>
+        <table>
+          <thead><tr><th>Driver</th><th>Pred</th><th>Actual</th></tr></thead>
+          <tbody>
+            
+            <tr>
+              <td>LEC</td>
+              <td class="num">1</td>
+              <td class="pos">8.0</td>
+            </tr>
+            
+            <tr>
+              <td>VER</td>
+              <td class="num">2</td>
+              <td class="pos">2.0</td>
+            </tr>
+            
+            <tr>
+              <td>PIA</td>
+              <td class="num">3</td>
+              <td class="pos">9.0</td>
+            </tr>
+            
+            <tr>
+              <td>NOR</td>
+              <td class="num">4</td>
+              <td class="pos">1.0</td>
+            </tr>
+            
+            <tr>
+              <td>RUS</td>
+              <td class="num">5</td>
+              <td class="pos">3.0</td>
+            </tr>
+            
+            <tr>
+              <td>TSU</td>
+              <td class="num">6</td>
+              <td class="pos">12.0</td>
+            </tr>
+            
+            <tr>
+              <td>HAM</td>
+              <td class="num">7</td>
+              <td class="pos">10.0</td>
+            </tr>
+            
+            <tr>
+              <td>STR</td>
+              <td class="num">8</td>
+              <td class="pos">6.0</td>
+            </tr>
+            
+            <tr>
+              <td>SAI</td>
+              <td class="num">9</td>
+              <td class="pos">18.0</td>
+            </tr>
+            
+            <tr>
+              <td>GAS</td>
+              <td class="num">10</td>
+              <td class="pos">11.0</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </article>
+    </section>
+  </div>
+  
+</body>
+</html>

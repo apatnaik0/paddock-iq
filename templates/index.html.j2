@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaddockIQ | {{ season }} Round {{ round_number }}</title>
+  <style>
+    :root {
+      --bg: #090c11;
+      --panel: #121720;
+      --panel-2: #171f2b;
+      --ink: #edf3ff;
+      --muted: #9db0cc;
+      --line: #2b3647;
+      --accent: #4ea1ff;
+      --accent-2: #22c55e;
+      --accent-3: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 19px;
+      line-height: 1.45;
+      background: radial-gradient(circle at 14% 8%, #11192a 0%, var(--bg) 46%, #07090d 100%);
+      color: var(--ink);
+    }
+    .wrap { max-width: 1420px; margin: 0 auto; padding: 22px 16px 52px; }
+    .hero {
+      background: linear-gradient(145deg, #141b28 0%, #0f141d 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .brand { margin: 0; color: #e9f2ff; font-size: 1.06rem; font-weight: 800; letter-spacing: 0.3px; }
+    h1 { margin: 0 0 6px; font-size: 2rem; letter-spacing: 0.2px; }
+    .muted { color: var(--muted); margin: 0; font-size: 1.08rem; }
+    .topnav { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .navbtn {
+      color: #071222;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 8px 14px;
+    }
+    .navbtn.inactive {
+      color: #dfe8f7;
+      background: #111a28;
+      border-color: #31405a;
+    }
+    .section-title { margin: 18px 2px 8px; color: #c8d9f2; font-size: 1.18rem; font-weight: 700; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 1200px) {
+      .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    }
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .card h3 { margin: 0 0 10px; font-size: 1.16rem; }
+    .kpi {
+      font-size: 1.62rem;
+      font-weight: 800;
+      color: #e9f2ff;
+      margin: 0 0 2px;
+    }
+    .kpi-sub {
+      font-size: 1.02rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 1.08rem; }
+    th, td { text-align: left; border-bottom: 1px solid #233043; padding: 6px 4px; }
+    th { color: #bfd1ea; font-weight: 600; }
+    td { color: #dfe8f7; }
+    .num { color: var(--accent); font-weight: 700; }
+    .pos { color: var(--accent-2); font-weight: 600; }
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #30405a;
+      background: #101828;
+      color: #d7e5fc;
+      margin-right: 6px;
+      font-size: 0.96rem;
+    }
+    .hl-list { margin: 0; padding-left: 20px; color: #dfe8f7; font-size: 1.05rem; }
+    .hl-list li { margin: 6px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    {% set co = circuit_overview if circuit_overview is defined else {} %}
+    <section class="hero">
+      <p class="brand">PaddockIQ</p>
+      <h1>Overview</h1>
+      <p class="muted">{{ season }} Round {{ round_number }} | {{ event_name }}</p>
+      <div class="topnav">
+        <a class="navbtn inactive" href="../../index.html">Race Hub</a>
+        <a class="navbtn" href="index.html">Overview</a>
+        <a class="navbtn inactive" href="round.html">Weekend Analysis</a>
+        <a class="navbtn inactive" href="strategy.html">Strategy Lab</a>
+      </div>
+    </section>
+    <p class="muted" style="margin:8px 2px 0;">Historical basis: last {{ co.history_races_used if co and co.history_races_used is not none else "N/A" }} races at this round/circuit slot</p>
+
+    <p class="section-title">Circuit Profile</p>
+    <section class="grid">
+      <article class="card">
+        <h3>Turns</h3>
+        <p class="kpi">{{ co.turns if co and co.turns is not none else "N/A" }}</p>
+        <p class="kpi-sub">Unique numbered corners</p>
+      </article>
+      <article class="card">
+        <h3>Gear Changes / Lap</h3>
+        <p class="kpi">{{ co.gear_changes_per_lap if co and co.gear_changes_per_lap is not none else "N/A" }}</p>
+        <p class="kpi-sub">From fastest qualifying lap telemetry</p>
+      </article>
+      <article class="card">
+        <h3>Weekend Fastest Lap</h3>
+        <p class="kpi" style="font-size:1.22rem;">{{ co.weekend_fastest_lap if co and co.weekend_fastest_lap else "N/A" }}</p>
+        <p class="kpi-sub">Qualifying pole lap reference</p>
+      </article>
+      <article class="card">
+        <h3>Historical Fastest Lap</h3>
+        <p class="kpi" style="font-size:1.22rem;">{{ co.historical_fastest_lap if co and co.historical_fastest_lap else "N/A" }}</p>
+        <p class="kpi-sub">Last 5 races at this slot</p>
+      </article>
+      <article class="card">
+        <h3>Average Pit Stops</h3>
+        <p class="kpi">{{ co.avg_pit_stops if co and co.avg_pit_stops is not none else "N/A" }}</p>
+        <p class="kpi-sub">Per driver, historical average</p>
+      </article>
+      <article class="card">
+        <h3>SC / VSC Likelihood</h3>
+        <p class="kpi">{{ co.combined_neutralization_likelihood_pct if co and co.combined_neutralization_likelihood_pct is not none else "N/A" }}{% if co and co.combined_neutralization_likelihood_pct is not none %}%{% endif %}</p>
+        <p class="kpi-sub">SC: {{ co.sc_likelihood_pct if co and co.sc_likelihood_pct is not none else "N/A" }}% | VSC: {{ co.vsc_likelihood_pct if co and co.vsc_likelihood_pct is not none else "N/A" }}%</p>
+      </article>
+      <article class="card">
+        <h3>Pit Time Saved Under SC</h3>
+        <p class="kpi">{{ co.sc_pit_time_saved_s if co and co.sc_pit_time_saved_s is not none else "N/A" }}{% if co and co.sc_pit_time_saved_s is not none %} s{% endif %}</p>
+        <p class="kpi-sub">Historical pit-lap loss reduction proxy</p>
+      </article>
+      <article class="card">
+        <h3>Pit Time Saved Under VSC</h3>
+        <p class="kpi">{{ co.vsc_pit_time_saved_s if co and co.vsc_pit_time_saved_s is not none else "N/A" }}{% if co and co.vsc_pit_time_saved_s is not none %} s{% endif %}</p>
+        <p class="kpi-sub">Historical pit-lap loss reduction proxy</p>
+      </article>
+      <article class="card">
+        <h3>Average Pitstop Time</h3>
+        <p class="kpi">{{ co.avg_pitstop_time_s if co and co.avg_pitstop_time_s is not none else "N/A" }}{% if co and co.avg_pitstop_time_s is not none %} s{% endif %}</p>
+        <p class="kpi-sub">Pit-in to pit-out average over same-GP history</p>
+      </article>
+      <article class="card">
+        <h3>Best Driver (Car-Adjusted)</h3>
+        <p class="kpi" style="font-size:1.22rem;">{{ co.best_driver_adjusted.driver if co and co.best_driver_adjusted else "N/A" }}</p>
+        <p class="kpi-sub">
+          {% if co and co.best_driver_adjusted %}
+          {{ co.best_driver_adjusted.score }} pos vs team avg ({{ co.best_driver_adjusted.races }} races)
+          {% else %}
+          Teammate-relative overperformance at this circuit
+          {% endif %}
+        </p>
+      </article>
+    </section>
+
+    <section class="card" style="margin-top:12px;">
+      <h3>Circuit Highlights</h3>
+      <ul class="hl-list">
+        <li><strong>Key Overtake Zones:</strong> {% if co and co.key_overtake_zones %}{{ co.key_overtake_zones|join(" ") }}{% else %}Primary overtakes tend to concentrate at the longest DRS-assisted heavy-braking zones.{% endif %}</li>
+        <li><strong>Ideal Driver Characteristics:</strong> {% if co and co.ideal_driver_characteristics %}{{ co.ideal_driver_characteristics|join(" ") }}{% else %}Strong late-braking confidence, repeatable tyre management, and low-variance execution are usually rewarded here.{% endif %}</li>
+        <li><strong>Ideal Car Characteristics:</strong> {% if co and co.ideal_car_characteristics %}{{ co.ideal_car_characteristics|join(" ") }}{% else %}A balanced aero platform with efficient straight-line speed and stable traction tends to be optimal.{% endif %}</li>
+        <li><strong>Track Evolution:</strong> {% if co and co.track_evolution_notes %}{{ co.track_evolution_notes|join(" ") }}{% else %}Grip generally builds through the weekend, so late-session conditions are often the true reference.{% endif %}</li>
+        <li><strong>Race Control Context:</strong> SC {{ co.sc_likelihood_pct if co and co.sc_likelihood_pct is not none else "N/A" }}% and VSC {{ co.vsc_likelihood_pct if co and co.vsc_likelihood_pct is not none else "N/A" }}%; average pit-lane time is {{ co.avg_pitstop_time_s if co and co.avg_pitstop_time_s is not none else "N/A" }}s.</li>
+      </ul>
+    </section>
+
+    <p class="section-title">Previous Winners</p>
+    <section class="card">
+      {% if co and co.previous_winners %}
+      <table>
+        <thead><tr><th>Season</th><th>Winner</th><th>Team</th></tr></thead>
+        <tbody>
+          {% for w in co.previous_winners %}
+          <tr><td>{{ w.season }}</td><td>{{ w.driver }}</td><td>{{ w.team }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="muted">Historical winner data not available for this round.</p>
+      {% endif %}
+    </section>
+
+    <p class="section-title">Predictions</p>
+    <section class="grid-two">
+      <article class="card">
+        <h3>Qualifying Prediction</h3>
+        <p class="kpi-sub">
+          <span class="pill">Uses weekend pace + prior-year driver/team quali form + same-circuit boost</span>
+        </p>
+        <table>
+          <thead><tr><th>Driver</th><th>Pred</th><th>Actual</th></tr></thead>
+          <tbody>
+            {% for row in quali_predictions[:10] %}
+            <tr>
+              <td>{{ row.Driver }}</td>
+              <td class="num">{{ row.pred_quali_position }}</td>
+              <td class="pos">{{ row.quali_position }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </article>
+
+      <article class="card">
+        <h3>Race Prediction</h3>
+        <p class="kpi-sub">
+          <span class="pill">Uses weekend pace + qualifying + prior-year driver/team race form + same-circuit boost</span>
+        </p>
+        <table>
+          <thead><tr><th>Driver</th><th>Pred</th><th>Actual</th></tr></thead>
+          <tbody>
+            {% for row in race_predictions[:10] %}
+            <tr>
+              <td>{{ row.Driver }}</td>
+              <td class="num">{{ row.pred_race_position }}</td>
+              <td class="pos">{{ row.race_position }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </article>
+    </section>
+  </div>
+  {% if ga4_measurement_id %}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ ga4_measurement_id }}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', '{{ ga4_measurement_id }}', { 'anonymize_ip': true });
+
+  (function () {
+    const startedAt = Date.now();
+    function flushPageTime() {
+      const secs = (Date.now() - startedAt) / 1000;
+      if (secs < 1) return;
+      gtag('event', 'tab_time', {
+        tab_group: 'page',
+        tab_name: 'Overview',
+        time_seconds: Number(secs.toFixed(1)),
+        season: {{ season }},
+        round: {{ round_number }},
+        event_name: '{{ event_name|e }}'
+      });
+    }
+    window.addEventListener('beforeunload', flushPageTime);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') flushPageTime();
+    });
+  })();
+</script>
+  {% endif %}
+</body>
+</html>
