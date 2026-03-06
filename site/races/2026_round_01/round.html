@@ -3,20 +3,151 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PaddockIQ | 2026 Round 1 Analysis</title>
+  <title>PaddockIQ | Australian Grand Prix</title>
   <style>
-    :root { --bg:#090c11; --panel:#121720; --line:#2b3647; --ink:#edf3ff; --muted:#9db0cc; --accent:#4ea1ff; }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:"Avenir Next","Segoe UI",sans-serif; font-size:19px; line-height:1.45; background:radial-gradient(circle at 15% 5%, #121b2a 0%, var(--bg) 48%, #07090d 100%); color:var(--ink); }
-    .wrap { max-width:1420px; margin:0 auto; padding:22px 16px 52px; }
-    .head { background:linear-gradient(145deg,#141b28 0%,#0f141d 100%); border:1px solid var(--line); border-radius:14px; padding:14px; min-height:160px; display:flex; flex-direction:column; justify-content:center; }
-    .brand { margin:0; color:#e9f2ff; font-size:1.06rem; font-weight:800; letter-spacing:0.3px; }
-    h1 { margin:0 0 6px; font-size:2rem; letter-spacing:0.2px; }
-    .muted { color:var(--muted); margin:0; font-size:1.08rem; }
-    .topnav { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; }
-    .navbtn { color:#071222; background:var(--accent); border:1px solid var(--accent); border-radius:999px; text-decoration:none; font-weight:700; padding:8px 14px; }
-    .navbtn.inactive { color:#dfe8f7; background:#111a28; border-color:#31405a; }
-    .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; margin-top:12px; }
+    :root {
+      --bg: #090c11;
+      --panel: #121720;
+      --panel-2: #171f2b;
+      --ink: #edf3ff;
+      --muted: #9db0cc;
+      --line: #2b3647;
+      --accent: #4ea1ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 19px;
+      line-height: 1.45;
+      background: radial-gradient(circle at 15% 5%, #121b2a 0%, var(--bg) 48%, #07090d 100%);
+      color: var(--ink);
+    }
+    .wrap { max-width: 1420px; margin: 0 auto; padding: 22px 16px 52px; }
+    .head {
+      background: linear-gradient(145deg, #141b28 0%, #0f141d 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .brand { margin: 0; color: #e9f2ff; font-size: 1.06rem; font-weight: 800; letter-spacing: 0.3px; }
+    .topnav { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .navbtn {
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 8px 14px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #071222;
+    }
+    .navbtn.inactive {
+      color: #dfe8f7;
+      background: #111a28;
+      border-color: #31405a;
+    }
+    h1 { margin: 0 0 6px; font-size: 2rem; letter-spacing: 0.2px; }
+    .muted { color: var(--muted); margin: 0; font-size: 1.08rem; }
+
+    .top-tabs, .sub-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .tab-btn {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--ink);
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1.12rem;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #071222;
+    }
+
+    .tab-panel { display: none; margin-top: 8px; }
+    .tab-panel.active { display: block; }
+
+    .session {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .session h2 { margin: 0 0 6px; font-size: 1.32rem; }
+    .meta { display: flex; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 1.08rem; }
+
+    .imggrid {
+      display: block;
+      margin-top: 6px;
+    }
+    .chart {
+      background: #0f141d;
+      border: 1px solid #273246;
+      border-radius: 10px;
+      padding: 6px;
+      margin-bottom: 6px;
+    }
+    .chart h3 { margin: 0 0 8px; font-size: 1.14rem; color: #dce8f9; }
+    img {
+      width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      border-radius: 6px;
+      border: 1px solid #2a3447;
+      background: #0b0f16;
+    }
+    img.telemetry-large {
+      max-height: 900px;
+    }
+
+    .insight-box {
+      margin-top: 8px;
+      border: 1px solid #243245;
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: #0f141d;
+    }
+    .insight-title {
+      color: #c4d3ea;
+      font-size: 1.12rem;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+    .insight-box ul {
+      margin: 0;
+      padding-left: 16px;
+      color: #d7e3f6;
+      font-size: 1.08rem;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 1.1rem; }
+    th, td { text-align: left; border-bottom: 1px solid #223042; padding: 7px 4px; }
+    th { color: #bfd1ea; font-weight: 600; }
+    td { color: #dfe8f7; }
+
+    .empty {
+      border: 1px dashed #33435b;
+      border-radius: 10px;
+      padding: 10px;
+      color: var(--muted);
+      margin-top: 8px;
+      background: #0f141d;
+    }
   </style>
 </head>
 <body>
@@ -33,11 +164,444 @@
       </nav>
     </section>
 
-    <section class="card">
-      <h3 style="margin:0 0 8px;">Session Status</h3>
-      <p class="muted">FP1, FP2, FP3, Qualifying, and Race analysis are currently N/A because sessions have not commenced yet for the 2026 Australian Grand Prix.</p>
-      <p class="muted" style="margin-top:8px;">As soon as session data is available and the pipeline runs, this page will populate all charts, highlights, and tables automatically.</p>
+    <nav class="top-tabs">
+      <button class="tab-btn active" data-group="main" data-target="practice-panel">Practice</button>
+      <button class="tab-btn" data-group="main" data-target="qualifying-panel">Qualifying</button>
+      <button class="tab-btn" data-group="main" data-target="race-panel">Race</button>
+    </nav>
+
+    <section id="practice-panel" class="tab-panel active">
+      <nav class="sub-tabs">
+        
+        <button class="tab-btn active" data-group="practice" data-target="practice-fp1">FP1</button>
+        
+        <button class="tab-btn " data-group="practice" data-target="practice-fp2">FP2</button>
+        
+      </nav>
+      
+      <div id="practice-fp1" class="tab-panel active">
+        <article class="session">
+          <h2>FP1</h2>
+          <div class="meta"><span>Drivers: 21</span><span>Laps: 394</span></div>
+          <div class="imggrid">
+            
+            <article class="chart">
+              <h3>Pace Distribution</h3>
+              <img class="" src="assets/fp1_pace_box.png?v=1772819653" alt="FP1 Pace Distribution" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP1 includes 394 cleaned timed laps, with LEC (Ferrari) setting the top reference at 1:20.984.</li>
+                  
+                  <li>The order fans from +1.313s at P5 to +1.928s at P10; this shape is typical when teams split between short-run prep and long-run programs.</li>
+                  
+                  <li>Practice interpretation: wide boxes are often run-plan noise (fuel, traffic, prep laps), while narrow boxes with decent pace usually indicate a stable baseline rather than peak mode.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Median Pace Delta to Fastest</h3>
+              <img class="" src="assets/fp1_median_delta.png?v=1772819653" alt="FP1 Median Pace Delta to Fastest" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Median pace baseline is LEC (Ferrari) at 1:20.984, with immediate challengers at +0.388s and +0.559s.</li>
+                  
+                  <li>Delta growth to +1.313s (P5) and +1.928s (P10) suggests at least two pace tiers, but practice tiers can compress once fuel loads converge.</li>
+                  
+                  <li>Potential hidden-pace context: teams may suppress headline pace via higher fuel or conservative power modes, so prioritize repeatability and stint behavior over absolute median delta alone.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Delta Heatmap</h3>
+              <img class="" src="assets/fp1_sector_heatmap.png?v=1772819653" alt="FP1 Sector Delta Heatmap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP1 sector map is anchored to LEC (Ferrari) at 1:20.984, with the first chase gap at +0.388s.</li>
+                  
+                  <li>The spread expands from +0.559s at P3 to +1.928s at P10, which usually indicates multiple run plans (fuel/compound targets) rather than one pure quali simulation.</li>
+                  
+                  <li>Large single-sector losses in practice can come from conservative deployment and heavier fuel, so treat red cells as directionally useful, not absolute qualifying truth.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Pace vs Consistency</h3>
+              <img class="" src="assets/fp1_consistency.png?v=1772819653" alt="FP1 Pace vs Consistency" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>LEC (Ferrari) is the pace anchor at 1:20.984 over 29 laps, while HAM and VER sit at +0.388s and +0.559s.</li>
+                  
+                  <li>Drivers low on the chart with larger bubbles are showing repeatable race-run behavior; high vertical spread often points to mixed fuel targets, traffic, or setup experimentation.</li>
+                  
+                  <li>Potential sandbagging signal: if a team shows strong consistency and lap-count depth without headline top pace, they may be running conservative engine modes or heavier fuel.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Long-Run Pace</h3>
+              <img class="" src="assets/fp1_long_run_pace.png?v=1772819653" alt="FP1 Long-Run Pace" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Long-run reference is LEC (Ferrari) at 81.635s, with HAM at +0.331s and LIN at +0.952s.</li>
+                  
+                  <li>Each bar uses one representative race-run stint per driver (minimum 3 laps, excluding opening stint laps).</li>
+                  
+                  <li>Within the plotted long-run group, spread is +1.812s to P5 and +4.983s from fastest to slowest.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Compound Usage Mix</h3>
+              <img class="" src="assets/fp1_compound_usage.png?v=1772819653" alt="FP1 Compound Usage Mix" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Highest soft-running share: LIN (100.0%). Highest medium share: HAD (88.9%).</li>
+                  
+                  <li>No hard-compound running is present for the selected drivers in this session; programs are concentrated on soft/medium work.</li>
+                  
+                  <li>Most balanced S/M/H split is LEC (44.4% / 55.6% / 0.0%); compound bias can reflect deliberate program masking as much as pure pace.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Team Mean vs Top Speed</h3>
+              <img class="" src="assets/fp1_team_speed_profile.png?v=1772819653" alt="FP1 Team Mean vs Top Speed" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP1 speed profile links team-level mean speed to terminal speed, with the pace reference set by LEC (Ferrari).</li>
+                  
+                  <li>High top-speed but weaker mean-speed points typically indicate lower drag or stronger deployment, while high mean-speed with modest top-speed usually reflects downforce-biased setup.</li>
+                  
+                  <li>Practice caveat: engine mode masking and fuel-load variation can hide true one-lap pace, so use this chart as aero/efficiency direction rather than final ranking.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+          </div>
+          <table>
+            <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>Top-5 Avg Pace</th><th>Laps</th></tr></thead>
+            <tbody>
+              
+              <tr><td>1</td><td>LEC</td><td>Ferrari</td><td>1:20.984</td><td>29</td></tr>
+              
+              <tr><td>2</td><td>HAM</td><td>Ferrari</td><td>1:21.371</td><td>26</td></tr>
+              
+              <tr><td>3</td><td>VER</td><td>Red Bull Racing</td><td>1:21.542</td><td>21</td></tr>
+              
+              <tr><td>4</td><td>PIA</td><td>McLaren</td><td>1:21.872</td><td>15</td></tr>
+              
+              <tr><td>5</td><td>HAD</td><td>Red Bull Racing</td><td>1:22.296</td><td>18</td></tr>
+              
+              <tr><td>6</td><td>LIN</td><td>Racing Bulls</td><td>1:22.348</td><td>18</td></tr>
+              
+              <tr><td>7</td><td>OCO</td><td>Haas F1 Team</td><td>1:22.551</td><td>22</td></tr>
+              
+              <tr><td>8</td><td>BOR</td><td>Audi</td><td>1:22.780</td><td>18</td></tr>
+              
+              <tr><td>9</td><td>RUS</td><td>Mercedes</td><td>1:22.873</td><td>21</td></tr>
+              
+              <tr><td>10</td><td>SAI</td><td>Williams</td><td>1:22.912</td><td>25</td></tr>
+              
+            </tbody>
+          </table>
+        </article>
+      </div>
+      
+      <div id="practice-fp2" class="tab-panel ">
+        <article class="session">
+          <h2>FP2</h2>
+          <div class="meta"><span>Drivers: 22</span><span>Laps: 458</span></div>
+          <div class="imggrid">
+            
+            <article class="chart">
+              <h3>Pace Distribution</h3>
+              <img class="" src="assets/fp2_pace_box.png?v=1772819653" alt="FP2 Pace Distribution" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP2 includes 458 cleaned timed laps, with HAM (Ferrari) setting the top reference at 1:20.522.</li>
+                  
+                  <li>The order fans from +0.955s at P5 to +1.948s at P10; this shape is typical when teams split between short-run prep and long-run programs.</li>
+                  
+                  <li>Practice interpretation: wide boxes are often run-plan noise (fuel, traffic, prep laps), while narrow boxes with decent pace usually indicate a stable baseline rather than peak mode.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Median Pace Delta to Fastest</h3>
+              <img class="" src="assets/fp2_median_delta.png?v=1772819653" alt="FP2 Median Pace Delta to Fastest" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Median pace baseline is HAM (Ferrari) at 1:20.522, with immediate challengers at +0.271s and +0.340s.</li>
+                  
+                  <li>Delta growth to +0.955s (P5) and +1.948s (P10) suggests at least two pace tiers, but practice tiers can compress once fuel loads converge.</li>
+                  
+                  <li>Potential hidden-pace context: teams may suppress headline pace via higher fuel or conservative power modes, so prioritize repeatability and stint behavior over absolute median delta alone.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Delta Heatmap</h3>
+              <img class="" src="assets/fp2_sector_heatmap.png?v=1772819653" alt="FP2 Sector Delta Heatmap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP2 sector map is anchored to HAM (Ferrari) at 1:20.522, with the first chase gap at +0.271s.</li>
+                  
+                  <li>The spread expands from +0.340s at P3 to +1.948s at P10, which usually indicates multiple run plans (fuel/compound targets) rather than one pure quali simulation.</li>
+                  
+                  <li>Large single-sector losses in practice can come from conservative deployment and heavier fuel, so treat red cells as directionally useful, not absolute qualifying truth.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Pace vs Consistency</h3>
+              <img class="" src="assets/fp2_consistency.png?v=1772819653" alt="FP2 Pace vs Consistency" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>HAM (Ferrari) is the pace anchor at 1:20.522 over 27 laps, while PIA and LEC sit at +0.271s and +0.340s.</li>
+                  
+                  <li>Drivers low on the chart with larger bubbles are showing repeatable race-run behavior; high vertical spread often points to mixed fuel targets, traffic, or setup experimentation.</li>
+                  
+                  <li>Potential sandbagging signal: if a team shows strong consistency and lap-count depth without headline top pace, they may be running conservative engine modes or heavier fuel.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Long-Run Pace</h3>
+              <img class="" src="assets/fp2_long_run_pace.png?v=1772819653" alt="FP2 Long-Run Pace" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Long-run reference is HAM (Ferrari) at 80.901s, with GAS at +1.613s and ALB at +2.254s.</li>
+                  
+                  <li>Each bar uses one representative race-run stint per driver (minimum 3 laps, excluding opening stint laps).</li>
+                  
+                  <li>Within the plotted long-run group, spread is +2.703s to P5 and +4.957s from fastest to slowest.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Compound Usage Mix</h3>
+              <img class="" src="assets/fp2_compound_usage.png?v=1772819653" alt="FP2 Compound Usage Mix" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Highest soft-running share: PIA (54.5%). Highest medium share: SAI (100.0%).</li>
+                  
+                  <li>Highest hard-running share: RUS (92.9%), indicating the strongest bias to longer-stint baseline work in this session.</li>
+                  
+                  <li>Most balanced S/M/H split is NOR (53.8% / 0.0% / 46.2%); compound bias can reflect deliberate program masking as much as pure pace.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Team Mean vs Top Speed</h3>
+              <img class="" src="assets/fp2_team_speed_profile.png?v=1772819653" alt="FP2 Team Mean vs Top Speed" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP2 speed profile links team-level mean speed to terminal speed, with the pace reference set by HAM (Ferrari).</li>
+                  
+                  <li>High top-speed but weaker mean-speed points typically indicate lower drag or stronger deployment, while high mean-speed with modest top-speed usually reflects downforce-biased setup.</li>
+                  
+                  <li>Practice caveat: engine mode masking and fuel-load variation can hide true one-lap pace, so use this chart as aero/efficiency direction rather than final ranking.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+          </div>
+          <table>
+            <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>Top-5 Avg Pace</th><th>Laps</th></tr></thead>
+            <tbody>
+              
+              <tr><td>1</td><td>HAM</td><td>Ferrari</td><td>1:20.522</td><td>27</td></tr>
+              
+              <tr><td>2</td><td>PIA</td><td>McLaren</td><td>1:20.793</td><td>22</td></tr>
+              
+              <tr><td>3</td><td>LEC</td><td>Ferrari</td><td>1:20.862</td><td>25</td></tr>
+              
+              <tr><td>4</td><td>ANT</td><td>Mercedes</td><td>1:21.217</td><td>26</td></tr>
+              
+              <tr><td>5</td><td>HAD</td><td>Red Bull Racing</td><td>1:21.477</td><td>23</td></tr>
+              
+              <tr><td>6</td><td>HUL</td><td>Audi</td><td>1:21.694</td><td>29</td></tr>
+              
+              <tr><td>7</td><td>RUS</td><td>Mercedes</td><td>1:21.736</td><td>24</td></tr>
+              
+              <tr><td>8</td><td>NOR</td><td>McLaren</td><td>1:21.817</td><td>24</td></tr>
+              
+              <tr><td>9</td><td>LAW</td><td>Racing Bulls</td><td>1:22.116</td><td>25</td></tr>
+              
+              <tr><td>10</td><td>LIN</td><td>Racing Bulls</td><td>1:22.470</td><td>27</td></tr>
+              
+            </tbody>
+          </table>
+        </article>
+      </div>
+      
+    </section>
+
+    <section id="qualifying-panel" class="tab-panel">
+      <nav class="sub-tabs">
+        
+      </nav>
+
+      
+      <div class="empty">No qualifying split data available for this round.</div>
+      
+
+      
+    </section>
+
+    <section id="race-panel" class="tab-panel">
+      
+      <div class="empty">Race data is not available yet.</div>
+      
     </section>
   </div>
+
+  
+  <script>
+    const analyticsEnabled = false;
+    const tabTracker = (() => {
+      const starts = {};
+      function send(group, name, secs) {
+        if (!analyticsEnabled || typeof gtag !== 'function' || secs < 1) return;
+        gtag('event', 'tab_time', {
+          tab_group: group,
+          tab_name: name,
+          time_seconds: Number(secs.toFixed(1)),
+          season: 2026,
+          round: 1,
+          event_name: 'Australian Grand Prix',
+          page_name: 'Weekend Analysis'
+        });
+      }
+      return {
+        switch(group, name) {
+          const now = Date.now();
+          if (starts[group]) {
+            send(group, starts[group].name, (now - starts[group].ts) / 1000);
+          }
+          starts[group] = { name, ts: now };
+        },
+        flushAll() {
+          const now = Date.now();
+          Object.keys(starts).forEach((group) => {
+            const rec = starts[group];
+            send(group, rec.name, (now - rec.ts) / 1000);
+          });
+        }
+      };
+    })();
+
+    function activeButtonLabel(group) {
+      const btn = document.querySelector(`.tab-btn[data-group="${group}"].active`);
+      return btn ? btn.textContent.trim() : '';
+    }
+
+    function trackActiveSessionFromMain(mainTarget) {
+      if (mainTarget === 'practice-panel') {
+        tabTracker.switch('session', activeButtonLabel('practice') || 'Practice');
+        return;
+      }
+      if (mainTarget === 'qualifying-panel') {
+        tabTracker.switch('session', activeButtonLabel('qualifying') || 'Qualifying');
+        return;
+      }
+      tabTracker.switch('session', 'Race');
+    }
+
+    function activateTab(button) {
+      const group = button.dataset.group;
+      const target = button.dataset.target;
+      document.querySelectorAll(`.tab-btn[data-group="${group}"]`).forEach((btn) => btn.classList.remove('active'));
+      button.classList.add('active');
+
+      if (group === 'main') {
+        ['practice-panel', 'qualifying-panel', 'race-panel'].forEach((id) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.classList.toggle('active', id === target);
+        });
+        tabTracker.switch('main', button.textContent.trim());
+        trackActiveSessionFromMain(target);
+        return;
+      }
+
+      const subgroupButtons = document.querySelectorAll(`.tab-btn[data-group="${group}"]`);
+      subgroupButtons.forEach((b) => {
+        const panelId = b.dataset.target;
+        const panel = document.getElementById(panelId);
+        if (panel) panel.classList.remove('active');
+      });
+      const active = document.getElementById(target);
+      if (active) active.classList.add('active');
+      tabTracker.switch('session', button.textContent.trim());
+    }
+
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => activateTab(btn));
+    });
+
+    tabTracker.switch('page', 'Weekend Analysis');
+    tabTracker.switch('main', activeButtonLabel('main') || 'Practice');
+    trackActiveSessionFromMain('practice-panel');
+
+    window.addEventListener('beforeunload', () => tabTracker.flushAll());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') tabTracker.flushAll();
+    });
+  </script>
 </body>
 </html>

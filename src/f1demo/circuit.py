@@ -73,12 +73,11 @@ def _event_track_notes(event_name: str) -> dict[str, list[str]]:
     }
 
 
-def _turn_count_from_bundle(bundle: object) -> int | None:
-    q = bundle.sessions.get("Qualifying")
-    if q is None:
+def _turn_count_from_session(session_obj: object) -> int | None:
+    if session_obj is None:
         return None
     try:
-        info = q.get_circuit_info()
+        info = session_obj.get_circuit_info()
         if info is None or getattr(info, "corners", None) is None:
             return None
         corners = info.corners
@@ -89,12 +88,20 @@ def _turn_count_from_bundle(bundle: object) -> int | None:
         return None
 
 
-def _gear_changes_from_bundle(bundle: object) -> int | None:
-    q = bundle.sessions.get("Qualifying")
-    if q is None:
+def _turn_count_from_bundle(bundle: object) -> int | None:
+    # Prefer qualifying; fallback to practice/race if qualifying not available yet.
+    for key in ["Qualifying", "FP2", "FP1", "FP3", "Race"]:
+        turns = _turn_count_from_session(bundle.sessions.get(key))
+        if turns is not None:
+            return turns
+    return None
+
+
+def _gear_changes_from_session(session_obj: object) -> int | None:
+    if session_obj is None:
         return None
     try:
-        fastest = q.laps.pick_fastest()
+        fastest = session_obj.laps.pick_fastest()
         if fastest is None:
             return None
         tel = fastest.get_car_data()
@@ -106,6 +113,15 @@ def _gear_changes_from_bundle(bundle: object) -> int | None:
         return int((g.diff().fillna(0) != 0).sum())
     except Exception:
         return None
+
+
+def _gear_changes_from_bundle(bundle: object) -> int | None:
+    # Prefer qualifying telemetry; fallback to FP2/FP1 if qualifying isn't available yet.
+    for key in ["Qualifying", "FP2", "FP1", "FP3", "Race"]:
+        gear = _gear_changes_from_session(bundle.sessions.get(key))
+        if gear is not None:
+            return gear
+    return None
 
 
 def build_circuit_overview(bundle: object, history_years: int = 5) -> dict[str, Any]:
@@ -295,29 +311,51 @@ def build_circuit_overview(bundle: object, history_years: int = 5) -> dict[str, 
         best = min(fastest_records, key=lambda r: r["lap_seconds"])
         hist_fast = f"{_format_laptime(best['lap_seconds'])} ({best['driver']} - {best['season']})"
 
-    # Current weekend fastest lap should be the qualifying pole lap.
+    # Current weekend fastest lap: prefer qualifying pole; fallback to FP2/FP1/FP3 then race.
     weekend_fast = None
-    q = bundle.sessions.get("Qualifying")
-    if q is not None:
-        qlaps = laps_dataframe(q, "Qualifying").copy()
-        if not qlaps.empty:
-            qlaps["lap_seconds"] = pd.to_numeric(qlaps["lap_seconds"], errors="coerce")
-            qlaps = qlaps.dropna(subset=["lap_seconds"])
-            if not qlaps.empty:
-                j = qlaps["lap_seconds"].idxmin()
-                row = qlaps.loc[j]
-                weekend_fast = f"{_format_laptime(row['lap_seconds'])} ({row.get('Driver', '')})"
-    if not weekend_fast:
-        race = bundle.sessions.get("Race")
-        if race is not None:
-            rlaps = laps_dataframe(race, "Race").copy()
-            if not rlaps.empty:
-                rlaps["lap_seconds"] = pd.to_numeric(rlaps["lap_seconds"], errors="coerce")
-                rlaps = rlaps.dropna(subset=["lap_seconds"])
-                if not rlaps.empty:
-                    j = rlaps["lap_seconds"].idxmin()
-                    row = rlaps.loc[j]
-                    weekend_fast = f"{_format_laptime(row['lap_seconds'])} ({row.get('Driver', '')})"
+    for sname in ["Qualifying", "FP2", "FP1", "FP3", "Race"]:
+        sess = bundle.sessions.get(sname)
+        if sess is None:
+            continue
+        slaps = laps_dataframe(sess, sname).copy()
+        if slaps.empty:
+            continue
+        slaps["lap_seconds"] = pd.to_numeric(slaps["lap_seconds"], errors="coerce")
+        slaps = slaps.dropna(subset=["lap_seconds"])
+        if slaps.empty:
+            continue
+        j = slaps["lap_seconds"].idxmin()
+        row = slaps.loc[j]
+        weekend_fast = f"{_format_laptime(row['lap_seconds'])} ({row.get('Driver', '')} - {sname})"
+        break
+
+    turns_val = _turn_count_from_bundle(bundle)
+    gear_val = _gear_changes_from_bundle(bundle)
+
+    # Backfill with historical same-GP qualifying if current weekend sessions are incomplete.
+    if turns_val is None or gear_val is None:
+        for yr in range(season - 1, season - max_lookback_years - 1, -1):
+            try:
+                sched = fastf1.get_event_schedule(yr, include_testing=False)
+                if sched is None or sched.empty or "EventName" not in sched.columns or "RoundNumber" not in sched.columns:
+                    continue
+                name_norm = sched["EventName"].astype(str).str.strip().str.lower()
+                match = sched[name_norm == event_name.lower()]
+                if match.empty:
+                    continue
+                hist_round = pd.to_numeric(match.iloc[0]["RoundNumber"], errors="coerce")
+                if pd.isna(hist_round):
+                    continue
+                qs = fastf1.get_session(yr, int(hist_round), "Qualifying")
+                qs.load(laps=True, telemetry=True, weather=False, messages=False)
+            except Exception:
+                continue
+            if turns_val is None:
+                turns_val = _turn_count_from_session(qs)
+            if gear_val is None:
+                gear_val = _gear_changes_from_session(qs)
+            if turns_val is not None and gear_val is not None:
+                break
 
     combined_sc_vsc = 0.0
     if race_count > 0:
@@ -344,8 +382,8 @@ def build_circuit_overview(bundle: object, history_years: int = 5) -> dict[str, 
     notes = _event_track_notes(event_name)
 
     return {
-        "turns": _turn_count_from_bundle(bundle),
-        "gear_changes_per_lap": _gear_changes_from_bundle(bundle),
+        "turns": turns_val,
+        "gear_changes_per_lap": gear_val,
         "weekend_fastest_lap": weekend_fast,
         "historical_fastest_lap": hist_fast,
         "avg_pit_stops": round(float(np.mean(pit_stops)), 2) if pit_stops else None,

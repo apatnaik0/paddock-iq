@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import fastf1
 import pandas as pd
 from fastf1 import plotting
+from fastf1.exceptions import DataNotLoadedError
 
 from .settings import PATHS, SESSION_ORDER
 from .utils import ensure_dirs
@@ -58,7 +59,10 @@ def load_sessions(
 
 
 def laps_dataframe(session_obj: object, session_name: str) -> pd.DataFrame:
-    laps = session_obj.laps.copy()
+    try:
+        laps = session_obj.laps.copy()
+    except (DataNotLoadedError, AttributeError):
+        return pd.DataFrame()
     return laps_object_to_dataframe(laps, session_name)
 
 
@@ -111,7 +115,7 @@ def qualifying_parts_dataframes(session_obj: object) -> dict[str, pd.DataFrame]:
     out: dict[str, pd.DataFrame] = {}
     try:
         parts = session_obj.laps.split_qualifying_sessions()
-    except Exception:
+    except (DataNotLoadedError, AttributeError, Exception):
         return out
 
     labels = ["Q1", "Q2", "Q3"]
@@ -123,10 +127,6 @@ def qualifying_parts_dataframes(session_obj: object) -> dict[str, pd.DataFrame]:
 
 
 def results_dataframe(session_obj: object, session_name: str) -> pd.DataFrame:
-    res = session_obj.results.copy()
-    if res.empty:
-        return pd.DataFrame()
-
     candidate_cols = [
         "Abbreviation",
         "FullName",
@@ -136,7 +136,17 @@ def results_dataframe(session_obj: object, session_name: str) -> pd.DataFrame:
         "Status",
         "Points",
     ]
+    empty_out = pd.DataFrame(columns=["Driver", "FullName", "Team", "Position", "GridPosition", "Status", "Points", "session"])
+    try:
+        res = session_obj.results.copy()
+    except (DataNotLoadedError, AttributeError):
+        return empty_out
+    if res.empty:
+        return empty_out
+
     available = [c for c in candidate_cols if c in res.columns]
+    if not available:
+        return empty_out
     out = res[available].copy()
     out["session"] = session_name
     out = out.rename(columns={"Abbreviation": "Driver", "TeamName": "Team"})

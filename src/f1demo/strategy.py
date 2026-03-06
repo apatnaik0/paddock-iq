@@ -77,7 +77,7 @@ def _race_sim_pool(pool: pd.DataFrame) -> pd.DataFrame:
         work.groupby(["session", "Driver", "Stint"], as_index=False)
         .agg(stint_laps=("lap_seconds", "count"))
     )
-    long_stints = stint_lens[stint_lens["stint_laps"] >= 6]
+    long_stints = stint_lens[stint_lens["stint_laps"] >= 3]
     sim = work.merge(long_stints[["session", "Driver", "Stint"]], on=["session", "Driver", "Stint"], how="inner")
     # Drop first lap in each stint as warmup/outlap artifact.
     sim = sim[sim["tyre_age_lap"] >= 2]

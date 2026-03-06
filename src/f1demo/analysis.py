@@ -479,6 +479,217 @@ def _plot_practice_team_speed_profile(
     return {"title": "Team Mean vs Top Speed", "file": name}
 
 
+def _plot_practice_long_run_pace(
+    round_plot_dir: Path,
+    session_name: str,
+    df: pd.DataFrame,
+    driver_order: list[str] | None = None,
+    driver_colors: dict[str, str] | None = None,
+) -> dict | None:
+    req = {"Driver", "Stint", "LapNumber", "lap_seconds"}
+    if not req.issubset(set(df.columns)):
+        return None
+
+    use = df.dropna(subset=["Driver", "Stint", "LapNumber", "lap_seconds"]).copy()
+    if use.empty:
+        return None
+    use["Driver"] = use["Driver"].astype(str)
+    use["Stint"] = pd.to_numeric(use["Stint"], errors="coerce")
+    use = use[use["Stint"].notna()].copy()
+    if use.empty:
+        return None
+    use["Stint"] = use["Stint"].astype(int)
+    use = use.sort_values(["Driver", "Stint", "LapNumber"])
+    use["stint_lap_idx"] = use.groupby(["Driver", "Stint"]).cumcount() + 1
+    # Remove launch/out-lap effects from long-run estimate.
+    use = use[use["stint_lap_idx"] >= 3].copy()
+    if use.empty:
+        return None
+
+    if "Compound" not in use.columns:
+        use["Compound"] = "UNKNOWN"
+    use["Compound"] = use["Compound"].fillna("UNKNOWN").astype(str).str.upper()
+
+    stints = (
+        use.groupby(["Driver", "Team", "Stint", "Compound"], as_index=False)
+        .agg(lap_count=("lap_seconds", "count"), median_lap_s=("lap_seconds", "median"))
+    )
+    stints = stints[stints["lap_count"] >= 3].copy()
+    if stints.empty:
+        return None
+
+    # One representative long run per driver: longest stint, then quickest median.
+    stints = stints.sort_values(["Driver", "lap_count", "median_lap_s"], ascending=[True, False, True])
+    rep = stints.groupby("Driver", as_index=False).first()
+    if driver_order:
+        rep = rep.set_index("Driver").reindex(driver_order[:12]).dropna(subset=["Team", "median_lap_s"]).reset_index()
+    else:
+        rep = rep.sort_values("median_lap_s").head(12)
+    if rep.empty:
+        return None
+
+    rep = rep.sort_values("median_lap_s")
+    rep["delta_s"] = rep["median_lap_s"] - rep["median_lap_s"].min()
+
+    fig, ax = plt.subplots(figsize=(11, 5.8))
+    colors = rep["Driver"].map(lambda d: (driver_colors or {}).get(str(d), "#4ea1ff")).tolist()
+    ax.bar(rep["Driver"], rep["delta_s"], color=colors, edgecolor="#f4f7fb", linewidth=0.7)
+    ax.axhline(0.0, color="#9fb0c9", linewidth=1.0, linestyle="--")
+    for i, row in rep.reset_index(drop=True).iterrows():
+        ax.text(
+            i,
+            float(row["delta_s"]) + 0.01,
+            f"{int(row['lap_count'])}L {str(row['Compound'])[:3]}",
+            ha="center",
+            va="bottom",
+            fontsize=8.5,
+            color="#dce8f9",
+        )
+
+    ax.set_title(f"{session_name}: Long-Run Pace (Representative Stint)")
+    ax.set_xlabel("Driver")
+    ax.set_ylabel("Median Stint Pace Delta (s)")
+    ax.tick_params(axis="x", rotation=45)
+    _style_ax(ax)
+
+    name = _save_fig(fig, round_plot_dir / f"{session_name.lower()}_long_run_pace.png")
+
+    leader = rep.iloc[0]
+    p2 = rep.iloc[1] if len(rep) > 1 else None
+    p3 = rep.iloc[2] if len(rep) > 2 else None
+    rank_for_gap = min(5, len(rep))
+    rank_delta = float(rep.iloc[rank_for_gap - 1]["delta_s"]) if len(rep) > 0 else 0.0
+    tail_delta = float(rep.iloc[-1]["delta_s"]) if len(rep) > 0 else 0.0
+    insights = [
+        (
+            f"Long-run reference is {leader['Driver']} ({leader['Team']}) at {leader['median_lap_s']:.3f}s"
+            + (
+                f", with {p2['Driver']} at +{float(p2['delta_s']):.3f}s"
+                if p2 is not None
+                else ""
+            )
+            + (
+                f" and {p3['Driver']} at +{float(p3['delta_s']):.3f}s."
+                if p3 is not None
+                else "."
+            )
+        ),
+        "Each bar uses one representative race-run stint per driver (minimum 3 laps, excluding opening stint laps).",
+        f"Within the plotted long-run group, spread is +{rank_delta:.3f}s to P{rank_for_gap} and +{tail_delta:.3f}s from fastest to slowest.",
+    ]
+    return {"title": "Long-Run Pace", "file": name, "insights": insights}
+
+
+def _plot_practice_compound_usage(
+    round_plot_dir: Path,
+    session_name: str,
+    df: pd.DataFrame,
+    driver_order: list[str] | None = None,
+) -> dict | None:
+    if "Compound" not in df.columns or "Driver" not in df.columns:
+        return None
+
+    use = df.dropna(subset=["Driver", "Compound"]).copy()
+    if use.empty:
+        return None
+
+    use["Driver"] = use["Driver"].astype(str)
+    use["Compound"] = use["Compound"].astype(str).str.upper()
+    use["Compound"] = use["Compound"].replace(
+        {
+            "C1": "HARD",
+            "C2": "HARD",
+            "C3": "MEDIUM",
+            "C4": "SOFT",
+            "C5": "SOFT",
+        }
+    )
+    use = use[use["Compound"].isin(["SOFT", "MEDIUM", "HARD"])].copy()
+    if use.empty:
+        return None
+
+    if driver_order:
+        keep = [d for d in driver_order[:10] if d in set(use["Driver"].unique().tolist())]
+    else:
+        keep = (
+            use.groupby("Driver", as_index=False)["lap_seconds"]
+            .median()
+            .sort_values("lap_seconds")
+            .head(10)["Driver"]
+            .tolist()
+        )
+    if not keep:
+        return None
+    use = use[use["Driver"].isin(keep)].copy()
+
+    counts = (
+        use.groupby(["Driver", "Compound"], as_index=False)
+        .size()
+        .rename(columns={"size": "laps"})
+    )
+    piv = counts.pivot(index="Driver", columns="Compound", values="laps").fillna(0.0)
+    for c in ["SOFT", "MEDIUM", "HARD"]:
+        if c not in piv.columns:
+            piv[c] = 0.0
+    piv = piv[["SOFT", "MEDIUM", "HARD"]]
+    piv["total"] = piv.sum(axis=1)
+    piv = piv[piv["total"] > 0].copy()
+    if piv.empty:
+        return None
+
+    pct = piv[["SOFT", "MEDIUM", "HARD"]].div(piv["total"], axis=0) * 100.0
+    if driver_order:
+        pct = pct.reindex([d for d in keep if d in pct.index]).dropna(how="all")
+    else:
+        pct = pct.sort_values(["SOFT", "MEDIUM", "HARD"], ascending=False)
+    if pct.empty:
+        return None
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    y = np.arange(len(pct))
+    left = np.zeros(len(pct))
+    comp_order = ["SOFT", "MEDIUM", "HARD"]
+    comp_colors = [COMPOUND_COLORS["SOFT"], COMPOUND_COLORS["MEDIUM"], COMPOUND_COLORS["HARD"]]
+
+    for comp, color in zip(comp_order, comp_colors):
+        vals = pct[comp].to_numpy()
+        bars = ax.barh(y, vals, left=left, color=color, edgecolor="#f4f7fb", linewidth=0.5, label=comp.title())
+        for i, (bar, v) in enumerate(zip(bars, vals)):
+            if v >= 10.0:
+                ax.text(left[i] + v / 2.0, bar.get_y() + bar.get_height() / 2.0, f"{v:.0f}%", ha="center", va="center", color="#091018", fontsize=8, fontweight="bold")
+        left += vals
+
+    ax.set_yticks(y)
+    ax.set_yticklabels(pct.index.tolist())
+    ax.invert_yaxis()
+    ax.set_xlim(0, 100)
+    ax.set_xlabel("Share of Timed Running (%)")
+    ax.set_ylabel("Driver")
+    ax.set_title(f"{session_name}: Compound Usage Mix (Soft / Medium / Hard)")
+    leg = ax.legend(title="Compound", bbox_to_anchor=(1.02, 1), loc="upper left", borderaxespad=0.0, framealpha=0.9)
+    _style_legend(leg)
+    _style_ax(ax)
+
+    name = _save_fig(fig, round_plot_dir / f"{session_name.lower()}_compound_usage.png")
+
+    soft_leader = pct["SOFT"].idxmax()
+    med_leader = pct["MEDIUM"].idxmax()
+    hard_leader = pct["HARD"].idxmax()
+    balance = (pct[["SOFT", "MEDIUM", "HARD"]].max(axis=1) - pct[["SOFT", "MEDIUM", "HARD"]].min(axis=1)).idxmin()
+    max_hard = float(pct["HARD"].max())
+    hard_line = (
+        f"Highest hard-running share: {hard_leader} ({max_hard:.1f}%), indicating the strongest bias to longer-stint baseline work in this session."
+        if max_hard > 0.0
+        else "No hard-compound running is present for the selected drivers in this session; programs are concentrated on soft/medium work."
+    )
+    insights = [
+        f"Highest soft-running share: {soft_leader} ({pct.loc[soft_leader, 'SOFT']:.1f}%). Highest medium share: {med_leader} ({pct.loc[med_leader, 'MEDIUM']:.1f}%).",
+        hard_line,
+        f"Most balanced S/M/H split is {balance} ({pct.loc[balance, 'SOFT']:.1f}% / {pct.loc[balance, 'MEDIUM']:.1f}% / {pct.loc[balance, 'HARD']:.1f}%); compound bias can reflect deliberate program masking as much as pure pace.",
+    ]
+    return {"title": "Compound Usage Mix", "file": name, "insights": insights}
+
+
 def _plot_quali_improvement(round_plot_dir: Path, session_name: str, df: pd.DataFrame, driver_order: list[str] | None = None) -> dict | None:
     use = df.copy()
     grp = use.sort_values(["Driver", "LapNumber"]).groupby("Driver")
@@ -1150,10 +1361,16 @@ def build_session_charts(
         if sector_chart:
             charts.append(sector_chart)
         charts.append(_plot_practice_consistency(round_plot_dir, session_name, cleaned, driver_order, driver_colors))
+        lrp = _plot_practice_long_run_pace(round_plot_dir, session_name, cleaned, driver_order, driver_colors)
+        if lrp:
+            charts.append(lrp)
+        comp_mix = _plot_practice_compound_usage(round_plot_dir, session_name, cleaned, driver_order)
+        if comp_mix:
+            charts.append(comp_mix)
         sp = _plot_practice_team_speed_profile(round_plot_dir, session_name, cleaned, team_colors)
         if sp:
             charts.append(sp)
-        return charts[:5]
+        return charts[:7]
 
     elif session_group == "qualifying":
         sec_comp = _plot_quali_sector_delta_comparison(round_plot_dir, session_name, cleaned, driver_order, team_colors)

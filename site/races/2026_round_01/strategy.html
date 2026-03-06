@@ -3,27 +3,324 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PaddockIQ | 2026 Round 1 Strategy</title>
+  <title>PaddockIQ | Strategy Lab</title>
   <style>
-    :root { --bg:#090c11; --panel:#121720; --line:#2b3647; --ink:#edf3ff; --muted:#9db0cc; --accent:#4ea1ff; }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:"Avenir Next","Segoe UI",sans-serif; font-size:19px; line-height:1.45; background:radial-gradient(circle at 10% 10%, #11192a 0%, var(--bg) 42%, #07090d 100%); color:var(--ink); }
-    .wrap { max-width:1420px; margin:0 auto; padding:22px 16px 52px; }
-    .hero { background:linear-gradient(145deg,#141b28 0%,#0f141d 100%); border:1px solid var(--line); border-radius:14px; padding:14px; min-height:160px; display:flex; flex-direction:column; justify-content:center; }
-    .brand { margin:0; color:#e9f2ff; font-size:1.06rem; font-weight:800; letter-spacing:0.3px; }
-    h1 { margin:0 0 6px; font-size:2rem; letter-spacing:0.2px; }
-    .muted { color:var(--muted); margin:0; font-size:1.08rem; }
-    .topnav { display:flex; gap:12px; flex-wrap:wrap; margin-top:10px; }
-    .navbtn { color:#071222; background:var(--accent); border:1px solid var(--accent); border-radius:999px; text-decoration:none; font-weight:700; padding:8px 14px; }
-    .navbtn.inactive { color:#dfe8f7; background:#111a28; border-color:#31405a; }
-    .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px; margin-top:12px; }
-    table { width:100%; border-collapse:collapse; font-size:1.02rem; }
-    th,td { text-align:left; border-bottom:1px solid #233043; padding:6px 4px; }
-    th { color:#bfd1ea; font-weight:600; }
-    td { color:#dfe8f7; }
-    .hl-list { margin:0; padding-left:20px; color:#dfe8f7; font-size:1.05rem; }
-    .hl-list li { margin:6px 0; }
-    .note { border:1px solid #31405a; background:#101828; padding:8px 10px; border-radius:8px; margin-top:10px; color:#d9e6fc; font-size:1.0rem; }
+    :root {
+      --bg: #090c11;
+      --panel: #121720;
+      --panel-2: #171f2b;
+      --ink: #edf3ff;
+      --muted: #9db0cc;
+      --line: #2b3647;
+      --accent: #4ea1ff;
+      --p1: #22c55e;
+      --p2: #f59e0b;
+      --p3: #ef4444;
+      --soft: #ff3b30;
+      --med: #f5c518;
+      --hard: #f3f4f6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 19px;
+      line-height: 1.45;
+      background: radial-gradient(circle at 10% 10%, #11192a 0%, var(--bg) 42%, #07090d 100%);
+      color: var(--ink);
+    }
+    .wrap { max-width: 1420px; margin: 0 auto; padding: 22px 16px 52px; }
+    .hero {
+      background: linear-gradient(145deg, #141b28 0%, #0f141d 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .brand { margin: 0; color: #e9f2ff; font-size: 1.06rem; font-weight: 800; letter-spacing: 0.3px; }
+    h1 { margin: 0 0 6px; font-size: 2rem; letter-spacing: 0.2px; }
+    .muted { color: var(--muted); margin: 0; font-size: 1.08rem; }
+    .topnav { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .navbtn {
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 8px 14px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #071222;
+    }
+    .navbtn.inactive {
+      color: #dfe8f7;
+      background: #111a28;
+      border-color: #31405a;
+    }
+    .section { margin-top: 12px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .card h3 { margin: 0 0 8px; font-size: 1.16rem; }
+    .hint { color: var(--muted); margin: 0 0 10px; font-size: 1.02rem; }
+    .insight-box {
+      margin-top: 10px;
+      border: 1px solid #243245;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #0f141d;
+    }
+    .insight-title {
+      color: #c4d3ea;
+      font-size: 1.04rem;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+    .insight-box ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #d7e3f6;
+      font-size: 1rem;
+    }
+    .row { display: grid; grid-template-columns: 120px 1fr 80px; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .name { color: #dce8f9; font-weight: 600; font-size: 1.04rem; }
+    .value { color: #c7d5ec; text-align: right; font-size: 1.0rem; }
+    .stack {
+      width: 100%;
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #31405a;
+      background: #0d141f;
+      display: flex;
+    }
+    .seg1 { background: var(--p1); }
+    .seg2 { background: var(--p2); }
+    .seg3 { background: var(--p3); }
+
+    .lane {
+      width: 100%;
+      height: 30px;
+      border-radius: 6px;
+      position: relative;
+      background: linear-gradient(90deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 8.3333%);
+      background-color: #0d141f;
+      border: 1px solid #31405a;
+      overflow: hidden;
+    }
+    .compound-seg {
+      position: absolute;
+      top: 0;
+      height: 100%;
+    }
+    .comp-soft { background: #ff3b30; }
+    .comp-medium { background: #f5c518; }
+    .comp-hard { background: #f3f4f6; }
+    .comp-intermediate { background: #16a34a; }
+    .comp-wet { background: #2563eb; }
+    .comp-unknown { background: #6b7280; }
+    .pitwin {
+      position: absolute;
+      top: 2px;
+      height: calc(100% - 4px);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f8fbff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      white-space: nowrap;
+      text-shadow: 0 0 3px rgba(0, 0, 0, 0.95);
+      border: 1px dashed rgba(255, 255, 255, 0.9);
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(10, 14, 22, 0.72) 0px,
+        rgba(10, 14, 22, 0.72) 6px,
+        rgba(255, 255, 255, 0.12) 6px,
+        rgba(255, 255, 255, 0.12) 12px
+      );
+    }
+
+    .pacebar {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: #0d141f;
+      border: 1px solid #31405a;
+      overflow: hidden;
+      margin: 2px 0;
+    }
+    .soft { background: var(--soft); height: 100%; }
+    .med { background: var(--med); height: 100%; }
+    .hard { background: var(--hard); height: 100%; }
+    .pit-team-block {
+      border: 1px solid #273246;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #0f141d;
+    }
+    .pit-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .pit-team-name {
+      color: #dce8f9;
+      font-weight: 700;
+      font-size: 0.98rem;
+    }
+    .pit-exp {
+      color: #dfe8f7;
+      font-size: 1rem;
+      background: #182235;
+      border: 1px solid #31405a;
+      border-radius: 999px;
+      padding: 3px 10px;
+    }
+    .window-labels {
+      margin-top: 6px;
+      color: #c7d5ec;
+      font-size: 0.96rem;
+      line-height: 1.5;
+    }
+    .window-labels span { display: block; }
+    .lap-scale {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      color: #c7d5ec;
+      font-size: 1.02rem;
+      margin: 4px 0 10px;
+      gap: 0;
+    }
+    .lap-scale span { text-align: center; }
+    .lap-axis-wrap {
+      margin-left: 120px;
+      margin-right: 8px;
+    }
+    .compound-team {
+      border: 1px solid #273246;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #0f141d;
+    }
+    .compound-team-head {
+      color: #dce8f9;
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 1.04rem;
+    }
+    .compound-row {
+      display: grid;
+      grid-template-columns: 66px 1fr 96px;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .compound-label {
+      color: #c7d5ec;
+      font-size: 0.96rem;
+      font-weight: 600;
+    }
+    .compound-value {
+      color: #c7d5ec;
+      font-size: 0.94rem;
+      text-align: right;
+    }
+    .compound-legend {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+    .swatch {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      margin-right: 6px;
+      vertical-align: -1px;
+    }
+    .soft-swatch { background: var(--soft); }
+    .med-swatch { background: var(--med); }
+    .hard-swatch { background: var(--hard); border: 1px solid #9ba8bf; }
+    .edge-card {
+      border: 1px solid #273246;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #0f141d;
+    }
+    .edge-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .edge-team {
+      color: #dce8f9;
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .edge-call {
+      color: #dfe8f7;
+      font-size: 0.94rem;
+      background: #182235;
+      border: 1px solid #31405a;
+      border-radius: 999px;
+      padding: 3px 10px;
+    }
+    .edge-row {
+      display: grid;
+      grid-template-columns: 72px 1fr 72px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .edge-label {
+      color: #c7d5ec;
+      font-size: 0.96rem;
+      font-weight: 600;
+    }
+    .edge-track {
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      border: 1px solid #31405a;
+      background: #0d141f;
+      overflow: hidden;
+    }
+    .edge-undercut { height: 100%; background: #4ea1ff; }
+    .edge-overcut { height: 100%; background: #f59e0b; }
+    .edge-aggr { height: 100%; background: #ef4444; }
+    .edge-def { height: 100%; background: #22c55e; }
+    .edge-value {
+      color: #c7d5ec;
+      font-size: 0.94rem;
+      text-align: right;
+    }
+    .edge-note {
+      color: #9db0cc;
+      font-size: 0.94rem;
+      margin-top: 4px;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 1.08rem; }
+    th, td { text-align: left; border-bottom: 1px solid #233043; padding: 6px 4px; }
+    th { color: #bfd1ea; font-weight: 600; }
+    td { color: #dfe8f7; }
   </style>
 </head>
 <body>
@@ -40,33 +337,2248 @@
       </nav>
     </section>
 
-    <div class="note"><strong>Provisional Strategy Mode:</strong> No 2026 weekend session data is available yet. These windows and stop loads are historical priors from the last 5 Australian GP editions only.</div>
-
-    <section class="card">
-      <h3 style="margin:0 0 8px;">Historical Strategy Highlights</h3>
-      <ul class="hl-list">
-        <li>Earliest first-stop tendency: Mercedes (L6-L12); latest tendency: Red Bull Racing (L12-L18).</li>
-        <li>Highest expected stop load: Kick Sauber (3.5), lowest: Ferrari (2.1).</li>
-        <li>These are pre-weekend baseline assumptions and will be replaced by hybrid weekend+history outputs once FP/Quali/Race data exists.</li>
-      </ul>
+    <section class="section card">
+      <p class="muted">Race laps considered: 58</p>
+      <p class="muted">Data basis: current weekend sessions (primary signal) + previous same-GP editions (secondary context).</p>
+      
+      <p class="muted">
+        Hybrid strategy model active |
+        ML train set: 2025
+        
+        2025-R1, 2024-R3, 2023-R3, 2022-R3, 2019-R1
+        
+        (50 team-rounds)
+      </p>
+      
     </section>
 
-    <section class="card">
-      <h3 style="margin:0 0 8px;">Provisional Team Strategy Baseline</h3>
+    <section class="section card">
+      <h3>Pit Window + Stop Load Map</h3>
+      <p class="hint">Pit windows and expected stop load by team.</p>
+      
+      <div class="lap-axis-wrap">
+        <div class="lap-scale">
+          <span>L1</span>
+          <span>L10</span>
+          <span>L19</span>
+          <span>L29</span>
+          <span>L39</span>
+          <span>L48</span>
+          <span>L58</span>
+        </div>
+      </div>
+      
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">Audi</span>
+          <span class="pit-exp">Expected Stops: 1.76</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-soft" style="left: 0%; width: 24.14%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 24.14%; width: 12.07%;">
+              SOFT -> HARD
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-hard" style="left: 36.21%; width: 17.24%;"></div>
+
+              
+              
+              <div class="pitwin" style="left: 53.45%; width: 12.07%;">
+                HARD -> MEDIUM
+              </div>
+
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 65.52%; width: 34.48%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L15-L21</span>
+          <span>Stop 2 Window: L32-L38</span>
+        </div>
+      </article>
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">Ferrari</span>
+          <span class="pit-exp">Expected Stops: 1.65</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-hard" style="left: 0%; width: 22.41%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 22.41%; width: 12.07%;">
+              HARD -> MEDIUM
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 34.48%; width: 17.24%;"></div>
+
+              
+              
+              <div class="pitwin" style="left: 51.72%; width: 12.07%;">
+                MEDIUM -> MEDIUM
+              </div>
+
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 63.79%; width: 36.21%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L14-L20</span>
+          <span>Stop 2 Window: L31-L37</span>
+        </div>
+      </article>
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">McLaren</span>
+          <span class="pit-exp">Expected Stops: 1.65</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-hard" style="left: 0%; width: 22.41%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 22.41%; width: 12.07%;">
+              HARD -> MEDIUM
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 34.48%; width: 17.24%;"></div>
+
+              
+              
+              <div class="pitwin" style="left: 51.72%; width: 12.07%;">
+                MEDIUM -> MEDIUM
+              </div>
+
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 63.79%; width: 36.21%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L14-L20</span>
+          <span>Stop 2 Window: L31-L37</span>
+        </div>
+      </article>
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">Alpine</span>
+          <span class="pit-exp">Expected Stops: 1.39</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-medium" style="left: 0%; width: 24.14%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 24.14%; width: 12.07%;">
+              MEDIUM -> HARD
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-hard" style="left: 36.21%; width: 63.79%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L15-L21</span>
+          <span>Stop 2 Window: -</span>
+        </div>
+      </article>
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">Mercedes</span>
+          <span class="pit-exp">Expected Stops: 1.63</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-hard" style="left: 0%; width: 22.41%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 22.41%; width: 12.07%;">
+              HARD -> MEDIUM
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 34.48%; width: 17.24%;"></div>
+
+              
+              
+              <div class="pitwin" style="left: 51.72%; width: 12.07%;">
+                MEDIUM -> MEDIUM
+              </div>
+
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 63.79%; width: 36.21%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L14-L20</span>
+          <span>Stop 2 Window: L31-L37</span>
+        </div>
+      </article>
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">Williams</span>
+          <span class="pit-exp">Expected Stops: 1.64</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-hard" style="left: 0%; width: 22.41%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 22.41%; width: 12.07%;">
+              HARD -> MEDIUM
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 34.48%; width: 17.24%;"></div>
+
+              
+              
+              <div class="pitwin" style="left: 51.72%; width: 12.07%;">
+                MEDIUM -> MEDIUM
+              </div>
+
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 63.79%; width: 36.21%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L14-L20</span>
+          <span>Stop 2 Window: L31-L37</span>
+        </div>
+      </article>
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">Red Bull Racing</span>
+          <span class="pit-exp">Expected Stops: 1.78</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-hard" style="left: 0%; width: 20.69%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 20.69%; width: 12.07%;">
+              HARD -> MEDIUM
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 32.76%; width: 17.24%;"></div>
+
+              
+              
+              <div class="pitwin" style="left: 50.0%; width: 12.07%;">
+                MEDIUM -> MEDIUM
+              </div>
+
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 62.07%; width: 37.93%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L13-L19</span>
+          <span>Stop 2 Window: L30-L36</span>
+        </div>
+      </article>
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">Aston Martin</span>
+          <span class="pit-exp">Expected Stops: 1.63</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-hard" style="left: 0%; width: 22.41%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 22.41%; width: 12.07%;">
+              HARD -> MEDIUM
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 34.48%; width: 17.24%;"></div>
+
+              
+              
+              <div class="pitwin" style="left: 51.72%; width: 12.07%;">
+                MEDIUM -> MEDIUM
+              </div>
+
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 63.79%; width: 36.21%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L14-L20</span>
+          <span>Stop 2 Window: L31-L37</span>
+        </div>
+      </article>
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">Racing Bulls</span>
+          <span class="pit-exp">Expected Stops: 1.4</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-hard" style="left: 0%; width: 39.66%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 39.66%; width: 12.07%;">
+              HARD -> MEDIUM
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 51.72%; width: 48.28%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L24-L30</span>
+          <span>Stop 2 Window: -</span>
+        </div>
+      </article>
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">Haas F1 Team</span>
+          <span class="pit-exp">Expected Stops: 1.63</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-soft" style="left: 0%; width: 24.14%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 24.14%; width: 12.07%;">
+              SOFT -> MEDIUM
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 36.21%; width: 17.24%;"></div>
+
+              
+              
+              <div class="pitwin" style="left: 53.45%; width: 12.07%;">
+                MEDIUM -> HARD
+              </div>
+
+              
+              
+              
+              <div class="compound-seg comp-hard" style="left: 65.52%; width: 34.48%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L15-L21</span>
+          <span>Stop 2 Window: L32-L38</span>
+        </div>
+      </article>
+      
+      <article class="pit-team-block">
+        <div class="pit-head">
+          <span class="pit-team-name">Cadillac</span>
+          <span class="pit-exp">Expected Stops: 1.77</span>
+        </div>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+        
+        
+        
+        
+
+        <div class="lane" style="margin-top: 6px;">
+          
+            
+            
+            <div class="compound-seg comp-hard" style="left: 0%; width: 18.97%;"></div>
+
+            
+            
+            <div class="pitwin" style="left: 18.97%; width: 12.07%;">
+              HARD -> MEDIUM
+            </div>
+
+            
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 31.03%; width: 17.24%;"></div>
+
+              
+              
+              <div class="pitwin" style="left: 48.28%; width: 12.07%;">
+                MEDIUM -> MEDIUM
+              </div>
+
+              
+              
+              
+              <div class="compound-seg comp-medium" style="left: 60.34%; width: 39.66%;"></div>
+            
+          
+        </div>
+
+        <div class="window-labels">
+          <span>Stop 1 Window: L12-L18</span>
+          <span>Stop 2 Window: L29-L35</span>
+        </div>
+      </article>
+      
+      <div class="insight-box">
+        <p class="insight-title">Highlights</p>
+        <ul>
+          
+          <li>Earliest projected first stop is Cadillac (L12-L18); latest is Racing Bulls (L24-L30).</li>
+          
+          <li>Highest stop load is Red Bull Racing at 1.78 stops, while Alpine is lowest at 1.39.</li>
+          
+          <li>Opening compound paths show early intent: Audi: SOFT -> HARD, then HARD -> MEDIUM | Ferrari: HARD -> MEDIUM, then MEDIUM -> MEDIUM | McLaren: HARD -> MEDIUM, then MEDIUM -> MEDIUM.</li>
+          
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h3>Team Strategy + Pit Stop Forecast</h3>
       <table>
-        <thead><tr><th>Team</th><th>Hist Avg Quali Pos</th><th>Expected Stops</th><th>Pit Window 1</th><th>Pit Window 2</th><th>Bias</th></tr></thead>
-        <tbody><tr><td>Ferrari</td><td>5.2</td><td>2.1</td><td>L10-L16</td><td>TBD</td><td>2-stop bias</td></tr>
-<tr><td>Mercedes</td><td>5.7</td><td>2.2</td><td>L6-L12</td><td>L30-L36</td><td>2-stop bias</td></tr>
-<tr><td>Red Bull Racing</td><td>7.2</td><td>2.3</td><td>L12-L18</td><td>L26-L32</td><td>2-stop bias</td></tr>
-<tr><td>McLaren</td><td>7.9</td><td>2.4</td><td>L10-L16</td><td>L38-L44</td><td>2-stop bias</td></tr>
-<tr><td>Racing Bulls</td><td>8.0</td><td>2.5</td><td>L6-L6</td><td>TBD</td><td>2-3 stop risk</td></tr>
-<tr><td>Aston Martin</td><td>11.5</td><td>2.62</td><td>L6-L10</td><td>L20-L26</td><td>2-3 stop risk</td></tr>
-<tr><td>Alpine</td><td>11.62</td><td>2.25</td><td>L7-L13</td><td>L28-L34</td><td>2-stop bias</td></tr>
-<tr><td>Haas F1 Team</td><td>13.8</td><td>2.3</td><td>L10-L16</td><td>L30-L36</td><td>2-stop bias</td></tr>
-<tr><td>Williams</td><td>14.22</td><td>2.3</td><td>L6-L10</td><td>L21-L27</td><td>2-stop bias</td></tr>
-<tr><td>Kick Sauber</td><td>16.0</td><td>3.5</td><td>L6-L8</td><td>L17-L23</td><td>2-3 stop risk</td></tr></tbody>
+        <thead>
+          <tr><th>Team</th><th>Expected Stops</th><th>P(1)</th><th>P(2)</th><th>P(3+)</th><th>Strategy</th><th>Pit Window 1</th><th>Pit1 Tyre</th><th>Pit Window 2</th><th>Pit2 Tyre</th></tr>
+        </thead>
+        <tbody>
+          
+          <tr>
+            <td>Audi</td>
+            <td>1.76</td>
+            <td>23.8%</td>
+            <td>76.2%</td>
+            <td>0.0%</td>
+            <td>SOFT -> HARD -> MEDIUM</td>
+            <td>L15-L21</td>
+            <td>SOFT -> HARD</td>
+            <td>L32-L38</td>
+            <td>HARD -> MEDIUM</td>
+          </tr>
+          
+          <tr>
+            <td>Ferrari</td>
+            <td>1.65</td>
+            <td>35.0%</td>
+            <td>65.0%</td>
+            <td>0.0%</td>
+            <td>HARD -> MEDIUM -> MEDIUM</td>
+            <td>L14-L20</td>
+            <td>HARD -> MEDIUM</td>
+            <td>L31-L37</td>
+            <td>MEDIUM -> MEDIUM</td>
+          </tr>
+          
+          <tr>
+            <td>McLaren</td>
+            <td>1.65</td>
+            <td>35.1%</td>
+            <td>64.9%</td>
+            <td>0.0%</td>
+            <td>HARD -> MEDIUM -> MEDIUM</td>
+            <td>L14-L20</td>
+            <td>HARD -> MEDIUM</td>
+            <td>L31-L37</td>
+            <td>MEDIUM -> MEDIUM</td>
+          </tr>
+          
+          <tr>
+            <td>Alpine</td>
+            <td>1.39</td>
+            <td>60.5%</td>
+            <td>39.5%</td>
+            <td>0.0%</td>
+            <td>MEDIUM -> HARD</td>
+            <td>L15-L21</td>
+            <td>MEDIUM -> HARD</td>
+            <td></td>
+            <td>-</td>
+          </tr>
+          
+          <tr>
+            <td>Mercedes</td>
+            <td>1.63</td>
+            <td>36.8%</td>
+            <td>63.2%</td>
+            <td>0.0%</td>
+            <td>HARD -> MEDIUM -> MEDIUM</td>
+            <td>L14-L20</td>
+            <td>HARD -> MEDIUM</td>
+            <td>L31-L37</td>
+            <td>MEDIUM -> MEDIUM</td>
+          </tr>
+          
+          <tr>
+            <td>Williams</td>
+            <td>1.64</td>
+            <td>36.4%</td>
+            <td>63.6%</td>
+            <td>0.0%</td>
+            <td>HARD -> MEDIUM -> MEDIUM</td>
+            <td>L14-L20</td>
+            <td>HARD -> MEDIUM</td>
+            <td>L31-L37</td>
+            <td>MEDIUM -> MEDIUM</td>
+          </tr>
+          
+          <tr>
+            <td>Red Bull Racing</td>
+            <td>1.78</td>
+            <td>22.1%</td>
+            <td>77.9%</td>
+            <td>0.0%</td>
+            <td>HARD -> MEDIUM -> MEDIUM</td>
+            <td>L13-L19</td>
+            <td>HARD -> MEDIUM</td>
+            <td>L30-L36</td>
+            <td>MEDIUM -> MEDIUM</td>
+          </tr>
+          
+          <tr>
+            <td>Aston Martin</td>
+            <td>1.63</td>
+            <td>36.7%</td>
+            <td>63.3%</td>
+            <td>0.0%</td>
+            <td>HARD -> MEDIUM -> MEDIUM</td>
+            <td>L14-L20</td>
+            <td>HARD -> MEDIUM</td>
+            <td>L31-L37</td>
+            <td>MEDIUM -> MEDIUM</td>
+          </tr>
+          
+          <tr>
+            <td>Racing Bulls</td>
+            <td>1.4</td>
+            <td>60.3%</td>
+            <td>39.7%</td>
+            <td>0.0%</td>
+            <td>HARD -> MEDIUM</td>
+            <td>L24-L30</td>
+            <td>HARD -> MEDIUM</td>
+            <td></td>
+            <td>-</td>
+          </tr>
+          
+          <tr>
+            <td>Haas F1 Team</td>
+            <td>1.63</td>
+            <td>36.8%</td>
+            <td>63.2%</td>
+            <td>0.0%</td>
+            <td>SOFT -> MEDIUM -> HARD</td>
+            <td>L15-L21</td>
+            <td>SOFT -> MEDIUM</td>
+            <td>L32-L38</td>
+            <td>MEDIUM -> HARD</td>
+          </tr>
+          
+          <tr>
+            <td>Cadillac</td>
+            <td>1.77</td>
+            <td>23.1%</td>
+            <td>76.9%</td>
+            <td>0.0%</td>
+            <td>HARD -> MEDIUM -> MEDIUM</td>
+            <td>L12-L18</td>
+            <td>HARD -> MEDIUM</td>
+            <td>L29-L35</td>
+            <td>MEDIUM -> MEDIUM</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h3>Undercut vs Overcut Edge Map</h3>
+      <p class="hint">Tactical edge view with trigger timing and viability scores.</p>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Audi</span>
+          <span class="edge-call">OVERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 37.3%;"></div></div>
+          <span class="edge-value">0.290 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 100.0%;"></div></div>
+          <span class="edge-value">0.777 s</span>
+        </div>
+        <p class="edge-note">Trigger: L15-L21 (center L18) | Viability U/O: 27% / 73%</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Ferrari</span>
+          <span class="edge-call">OVERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 30.9%;"></div></div>
+          <span class="edge-value">0.240 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 100.0%;"></div></div>
+          <span class="edge-value">0.777 s</span>
+        </div>
+        <p class="edge-note">Trigger: L14-L20 (center L17) | Viability U/O: 24% / 76%</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">McLaren</span>
+          <span class="edge-call">OVERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 34.6%;"></div></div>
+          <span class="edge-value">0.269 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 100.0%;"></div></div>
+          <span class="edge-value">0.777 s</span>
+        </div>
+        <p class="edge-note">Trigger: L14-L20 (center L17) | Viability U/O: 26% / 74%</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Alpine</span>
+          <span class="edge-call">OVERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 28.7%;"></div></div>
+          <span class="edge-value">0.223 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 68.0%;"></div></div>
+          <span class="edge-value">0.528 s</span>
+        </div>
+        <p class="edge-note">Trigger: L15-L21 (center L18) | Viability U/O: 30% / 70%</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Mercedes</span>
+          <span class="edge-call">OVERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 34.0%;"></div></div>
+          <span class="edge-value">0.264 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 100.0%;"></div></div>
+          <span class="edge-value">0.777 s</span>
+        </div>
+        <p class="edge-note">Trigger: L14-L20 (center L17) | Viability U/O: 25% / 75%</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Williams</span>
+          <span class="edge-call">OVERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 35.6%;"></div></div>
+          <span class="edge-value">0.277 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 100.0%;"></div></div>
+          <span class="edge-value">0.777 s</span>
+        </div>
+        <p class="edge-note">Trigger: L14-L20 (center L17) | Viability U/O: 26% / 74%</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Red Bull Racing</span>
+          <span class="edge-call">OVERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 34.4%;"></div></div>
+          <span class="edge-value">0.267 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 90.9%;"></div></div>
+          <span class="edge-value">0.706 s</span>
+        </div>
+        <p class="edge-note">Trigger: L13-L19 (center L16) | Viability U/O: 27% / 73%</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Aston Martin</span>
+          <span class="edge-call">OVERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 34.9%;"></div></div>
+          <span class="edge-value">0.271 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 100.0%;"></div></div>
+          <span class="edge-value">0.777 s</span>
+        </div>
+        <p class="edge-note">Trigger: L14-L20 (center L17) | Viability U/O: 26% / 74%</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Racing Bulls</span>
+          <span class="edge-call">OVERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 32.0%;"></div></div>
+          <span class="edge-value">0.249 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 100.0%;"></div></div>
+          <span class="edge-value">0.777 s</span>
+        </div>
+        <p class="edge-note">Trigger: L24-L30 (center L27) | Viability U/O: 24% / 76%</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Haas F1 Team</span>
+          <span class="edge-call">UNDERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 73.2%;"></div></div>
+          <span class="edge-value">0.569 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 40.9%;"></div></div>
+          <span class="edge-value">0.318 s</span>
+        </div>
+        <p class="edge-note">Trigger: L15-L21 (center L18) | Viability U/O: 64% / 36%</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Cadillac</span>
+          <span class="edge-call">OVERCUT</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Undercut</span>
+          <div class="edge-track"><div class="edge-undercut" style="width: 32.6%;"></div></div>
+          <span class="edge-value">0.253 s</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Overcut</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 100.0%;"></div></div>
+          <span class="edge-value">0.777 s</span>
+        </div>
+        <p class="edge-note">Trigger: L12-L18 (center L15) | Viability U/O: 25% / 75%</p>
+      </article>
+      
+      <div class="insight-box">
+        <p class="insight-title">Highlights</p>
+        <ul>
+          
+          <li>Strongest undercut edge is Haas F1 Team at 0.569s around L15-L21; strongest overcut edge is Audi at 0.777s.</li>
+          
+          <li>0 team(s) project a BALANCED call, while others show clearer bias between undercut and overcut viability.</li>
+          
+          <li>Highest call asymmetry: Ferrari U/O 24%/76% | Racing Bulls U/O 24%/76%.</li>
+          
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h3>Undercut / Overcut Strategy Table</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Preferred Call</th><th>Trigger Window</th><th>Trigger Lap</th><th>Undercut Gain (s)</th><th>Overcut Gain (s)</th><th>Viability U/O</th></tr></thead>
+        <tbody>
+          
+          <tr>
+            <td>Audi</td>
+            <td>OVERCUT</td>
+            <td>L15-L21</td>
+            <td>L18</td>
+            <td>0.290</td>
+            <td>0.777</td>
+            <td>27% / 73%</td>
+          </tr>
+          
+          <tr>
+            <td>Ferrari</td>
+            <td>OVERCUT</td>
+            <td>L14-L20</td>
+            <td>L17</td>
+            <td>0.240</td>
+            <td>0.777</td>
+            <td>24% / 76%</td>
+          </tr>
+          
+          <tr>
+            <td>McLaren</td>
+            <td>OVERCUT</td>
+            <td>L14-L20</td>
+            <td>L17</td>
+            <td>0.269</td>
+            <td>0.777</td>
+            <td>26% / 74%</td>
+          </tr>
+          
+          <tr>
+            <td>Alpine</td>
+            <td>OVERCUT</td>
+            <td>L15-L21</td>
+            <td>L18</td>
+            <td>0.223</td>
+            <td>0.528</td>
+            <td>30% / 70%</td>
+          </tr>
+          
+          <tr>
+            <td>Mercedes</td>
+            <td>OVERCUT</td>
+            <td>L14-L20</td>
+            <td>L17</td>
+            <td>0.264</td>
+            <td>0.777</td>
+            <td>25% / 75%</td>
+          </tr>
+          
+          <tr>
+            <td>Williams</td>
+            <td>OVERCUT</td>
+            <td>L14-L20</td>
+            <td>L17</td>
+            <td>0.277</td>
+            <td>0.777</td>
+            <td>26% / 74%</td>
+          </tr>
+          
+          <tr>
+            <td>Red Bull Racing</td>
+            <td>OVERCUT</td>
+            <td>L13-L19</td>
+            <td>L16</td>
+            <td>0.267</td>
+            <td>0.706</td>
+            <td>27% / 73%</td>
+          </tr>
+          
+          <tr>
+            <td>Aston Martin</td>
+            <td>OVERCUT</td>
+            <td>L14-L20</td>
+            <td>L17</td>
+            <td>0.271</td>
+            <td>0.777</td>
+            <td>26% / 74%</td>
+          </tr>
+          
+          <tr>
+            <td>Racing Bulls</td>
+            <td>OVERCUT</td>
+            <td>L24-L30</td>
+            <td>L27</td>
+            <td>0.249</td>
+            <td>0.777</td>
+            <td>24% / 76%</td>
+          </tr>
+          
+          <tr>
+            <td>Haas F1 Team</td>
+            <td>UNDERCUT</td>
+            <td>L15-L21</td>
+            <td>L18</td>
+            <td>0.569</td>
+            <td>0.318</td>
+            <td>64% / 36%</td>
+          </tr>
+          
+          <tr>
+            <td>Cadillac</td>
+            <td>OVERCUT</td>
+            <td>L12-L18</td>
+            <td>L15</td>
+            <td>0.253</td>
+            <td>0.777</td>
+            <td>25% / 75%</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h3>Stint Extension Decision Map</h3>
+      <p class="hint">Extension recommendation for the opening stint around the first pit window.</p>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Audi</span>
+          <span class="edge-call">MARGINAL</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 65%;"></div></div>
+          <span class="edge-value">65%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 10.1%;"></div></div>
+          <span class="edge-value">0.081 s</span>
+        </div>
+        <p class="edge-note">SOFT stint | Extend up to +1 laps | Window L15-L21</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Ferrari</span>
+          <span class="edge-call">MARGINAL</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 68%;"></div></div>
+          <span class="edge-value">68%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 23.6%;"></div></div>
+          <span class="edge-value">0.189 s</span>
+        </div>
+        <p class="edge-note">HARD stint | Extend up to +3 laps | Window L14-L20</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">McLaren</span>
+          <span class="edge-call">MARGINAL</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 68%;"></div></div>
+          <span class="edge-value">68%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 23.6%;"></div></div>
+          <span class="edge-value">0.189 s</span>
+        </div>
+        <p class="edge-note">HARD stint | Extend up to +3 laps | Window L14-L20</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Alpine</span>
+          <span class="edge-call">EXTEND</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 72%;"></div></div>
+          <span class="edge-value">72%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 24.8%;"></div></div>
+          <span class="edge-value">0.198 s</span>
+        </div>
+        <p class="edge-note">MEDIUM stint | Extend up to +4 laps | Window L15-L21</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Mercedes</span>
+          <span class="edge-call">MARGINAL</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 68%;"></div></div>
+          <span class="edge-value">68%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 23.6%;"></div></div>
+          <span class="edge-value">0.189 s</span>
+        </div>
+        <p class="edge-note">HARD stint | Extend up to +3 laps | Window L14-L20</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Williams</span>
+          <span class="edge-call">MARGINAL</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 68%;"></div></div>
+          <span class="edge-value">68%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 23.6%;"></div></div>
+          <span class="edge-value">0.189 s</span>
+        </div>
+        <p class="edge-note">HARD stint | Extend up to +3 laps | Window L14-L20</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Red Bull Racing</span>
+          <span class="edge-call">MARGINAL</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 65%;"></div></div>
+          <span class="edge-value">65%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 10.1%;"></div></div>
+          <span class="edge-value">0.081 s</span>
+        </div>
+        <p class="edge-note">HARD stint | Extend up to +1 laps | Window L13-L19</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Aston Martin</span>
+          <span class="edge-call">MARGINAL</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 68%;"></div></div>
+          <span class="edge-value">68%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 23.6%;"></div></div>
+          <span class="edge-value">0.189 s</span>
+        </div>
+        <p class="edge-note">HARD stint | Extend up to +3 laps | Window L14-L20</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Racing Bulls</span>
+          <span class="edge-call">EXTEND</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 83%;"></div></div>
+          <span class="edge-value">83%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 20.2%;"></div></div>
+          <span class="edge-value">0.162 s</span>
+        </div>
+        <p class="edge-note">HARD stint | Extend up to +6 laps | Window L24-L30</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Haas F1 Team</span>
+          <span class="edge-call">EXTEND</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 69%;"></div></div>
+          <span class="edge-value">69%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 31.5%;"></div></div>
+          <span class="edge-value">0.252 s</span>
+        </div>
+        <p class="edge-note">SOFT stint | Extend up to +4 laps | Window L15-L21</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Cadillac</span>
+          <span class="edge-call">MARGINAL</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Viability</span>
+          <div class="edge-track"><div class="edge-def" style="width: 65%;"></div></div>
+          <span class="edge-value">65%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Penalty</span>
+          <div class="edge-track"><div class="edge-overcut" style="width: 10.1%;"></div></div>
+          <span class="edge-value">0.081 s</span>
+        </div>
+        <p class="edge-note">HARD stint | Extend up to +1 laps | Window L12-L18</p>
+      </article>
+      
+      <div class="insight-box">
+        <p class="insight-title">Highlights</p>
+        <ul>
+          
+          <li>Best extension case is Racing Bulls (EXTEND) with 83% viability and +6 laps on HARD.</li>
+          
+          <li>Highest extension penalty appears at Haas F1 Team (0.252s), so stretching beyond L15-L21 is likely costly.</li>
+          
+          <li>Extension call mix across teams is EXTEND: 3, MARGINAL: 8, showing how constrained the first-stop phase is.</li>
+          
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h3>Stint Extension Table</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Stint Tyre</th><th>Pit Window</th><th>Max Extend (laps)</th><th>Penalty (s)</th><th>Viability</th><th>Call</th></tr></thead>
+        <tbody>
+          
+          <tr>
+            <td>Audi</td>
+            <td>SOFT</td>
+            <td>L15-L21</td>
+            <td>1</td>
+            <td>0.081</td>
+            <td>65%</td>
+            <td>MARGINAL</td>
+          </tr>
+          
+          <tr>
+            <td>Ferrari</td>
+            <td>HARD</td>
+            <td>L14-L20</td>
+            <td>3</td>
+            <td>0.189</td>
+            <td>68%</td>
+            <td>MARGINAL</td>
+          </tr>
+          
+          <tr>
+            <td>McLaren</td>
+            <td>HARD</td>
+            <td>L14-L20</td>
+            <td>3</td>
+            <td>0.189</td>
+            <td>68%</td>
+            <td>MARGINAL</td>
+          </tr>
+          
+          <tr>
+            <td>Alpine</td>
+            <td>MEDIUM</td>
+            <td>L15-L21</td>
+            <td>4</td>
+            <td>0.198</td>
+            <td>72%</td>
+            <td>EXTEND</td>
+          </tr>
+          
+          <tr>
+            <td>Mercedes</td>
+            <td>HARD</td>
+            <td>L14-L20</td>
+            <td>3</td>
+            <td>0.189</td>
+            <td>68%</td>
+            <td>MARGINAL</td>
+          </tr>
+          
+          <tr>
+            <td>Williams</td>
+            <td>HARD</td>
+            <td>L14-L20</td>
+            <td>3</td>
+            <td>0.189</td>
+            <td>68%</td>
+            <td>MARGINAL</td>
+          </tr>
+          
+          <tr>
+            <td>Red Bull Racing</td>
+            <td>HARD</td>
+            <td>L13-L19</td>
+            <td>1</td>
+            <td>0.081</td>
+            <td>65%</td>
+            <td>MARGINAL</td>
+          </tr>
+          
+          <tr>
+            <td>Aston Martin</td>
+            <td>HARD</td>
+            <td>L14-L20</td>
+            <td>3</td>
+            <td>0.189</td>
+            <td>68%</td>
+            <td>MARGINAL</td>
+          </tr>
+          
+          <tr>
+            <td>Racing Bulls</td>
+            <td>HARD</td>
+            <td>L24-L30</td>
+            <td>6</td>
+            <td>0.162</td>
+            <td>83%</td>
+            <td>EXTEND</td>
+          </tr>
+          
+          <tr>
+            <td>Haas F1 Team</td>
+            <td>SOFT</td>
+            <td>L15-L21</td>
+            <td>4</td>
+            <td>0.252</td>
+            <td>69%</td>
+            <td>EXTEND</td>
+          </tr>
+          
+          <tr>
+            <td>Cadillac</td>
+            <td>HARD</td>
+            <td>L12-L18</td>
+            <td>1</td>
+            <td>0.081</td>
+            <td>65%</td>
+            <td>MARGINAL</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h3>Defensive vs Aggressive Mode Map</h3>
+      <p class="hint">Race-mode profile based on tactical edge, degradation and stop model.</p>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Audi</span>
+          <span class="edge-call">DEFENSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 6%;"></div></div>
+          <span class="edge-value">6%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 94%;"></div></div>
+          <span class="edge-value">94%</span>
+        </div>
+        <p class="edge-note">Primary trigger L15-L21 | Protect tyre life and cover rivals in the pit window.</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Ferrari</span>
+          <span class="edge-call">DEFENSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 5%;"></div></div>
+          <span class="edge-value">5%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 95%;"></div></div>
+          <span class="edge-value">95%</span>
+        </div>
+        <p class="edge-note">Primary trigger L14-L20 | Protect tyre life and cover rivals in the pit window.</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">McLaren</span>
+          <span class="edge-call">DEFENSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 7%;"></div></div>
+          <span class="edge-value">7%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 93%;"></div></div>
+          <span class="edge-value">93%</span>
+        </div>
+        <p class="edge-note">Primary trigger L14-L20 | Protect tyre life and cover rivals in the pit window.</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Alpine</span>
+          <span class="edge-call">DEFENSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 29%;"></div></div>
+          <span class="edge-value">29%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 71%;"></div></div>
+          <span class="edge-value">71%</span>
+        </div>
+        <p class="edge-note">Primary trigger L15-L21 | Protect tyre life and cover rivals in the pit window.</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Mercedes</span>
+          <span class="edge-call">DEFENSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 6%;"></div></div>
+          <span class="edge-value">6%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 94%;"></div></div>
+          <span class="edge-value">94%</span>
+        </div>
+        <p class="edge-note">Primary trigger L14-L20 | Protect tyre life and cover rivals in the pit window.</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Williams</span>
+          <span class="edge-call">DEFENSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 8%;"></div></div>
+          <span class="edge-value">8%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 92%;"></div></div>
+          <span class="edge-value">92%</span>
+        </div>
+        <p class="edge-note">Primary trigger L14-L20 | Protect tyre life and cover rivals in the pit window.</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Red Bull Racing</span>
+          <span class="edge-call">DEFENSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 11%;"></div></div>
+          <span class="edge-value">11%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 89%;"></div></div>
+          <span class="edge-value">89%</span>
+        </div>
+        <p class="edge-note">Primary trigger L13-L19 | Protect tyre life and cover rivals in the pit window.</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Aston Martin</span>
+          <span class="edge-call">DEFENSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 7%;"></div></div>
+          <span class="edge-value">7%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 93%;"></div></div>
+          <span class="edge-value">93%</span>
+        </div>
+        <p class="edge-note">Primary trigger L14-L20 | Protect tyre life and cover rivals in the pit window.</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Racing Bulls</span>
+          <span class="edge-call">DEFENSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 10%;"></div></div>
+          <span class="edge-value">10%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 90%;"></div></div>
+          <span class="edge-value">90%</span>
+        </div>
+        <p class="edge-note">Primary trigger L24-L30 | Protect tyre life and cover rivals in the pit window.</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Haas F1 Team</span>
+          <span class="edge-call">AGGRESSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 85%;"></div></div>
+          <span class="edge-value">85%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 15%;"></div></div>
+          <span class="edge-value">15%</span>
+        </div>
+        <p class="edge-note">Primary trigger L15-L21 | Push undercut threat and attack around trigger lap.</p>
+      </article>
+      
+      <article class="edge-card">
+        <div class="edge-head">
+          <span class="edge-team">Cadillac</span>
+          <span class="edge-call">DEFENSIVE</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Aggressive</span>
+          <div class="edge-track"><div class="edge-aggr" style="width: 5%;"></div></div>
+          <span class="edge-value">5%</span>
+        </div>
+        <div class="edge-row">
+          <span class="edge-label">Defensive</span>
+          <div class="edge-track"><div class="edge-def" style="width: 95%;"></div></div>
+          <span class="edge-value">95%</span>
+        </div>
+        <p class="edge-note">Primary trigger L12-L18 | Protect tyre life and cover rivals in the pit window.</p>
+      </article>
+      
+      <div class="insight-box">
+        <p class="insight-title">Highlights</p>
+        <ul>
+          
+          <li>Most aggressive profile is Haas F1 Team (85%) around L15-L21; most defensive is Ferrari (95%).</li>
+          
+          <li>No team is fully balanced in this projection; race mode is polarized between attack and cover approaches.</li>
+          
+          <li>Primary trigger windows should be treated as action zones, with final call gated by tyre state and release traffic.</li>
+          
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h3>Race Mode Table</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Mode</th><th>Aggressive</th><th>Defensive</th><th>Primary Trigger</th><th>Guidance</th></tr></thead>
+        <tbody>
+          
+          <tr>
+            <td>Audi</td>
+            <td>DEFENSIVE</td>
+            <td>6%</td>
+            <td>94%</td>
+            <td>L15-L21</td>
+            <td>Protect tyre life and cover rivals in the pit window.</td>
+          </tr>
+          
+          <tr>
+            <td>Ferrari</td>
+            <td>DEFENSIVE</td>
+            <td>5%</td>
+            <td>95%</td>
+            <td>L14-L20</td>
+            <td>Protect tyre life and cover rivals in the pit window.</td>
+          </tr>
+          
+          <tr>
+            <td>McLaren</td>
+            <td>DEFENSIVE</td>
+            <td>7%</td>
+            <td>93%</td>
+            <td>L14-L20</td>
+            <td>Protect tyre life and cover rivals in the pit window.</td>
+          </tr>
+          
+          <tr>
+            <td>Alpine</td>
+            <td>DEFENSIVE</td>
+            <td>29%</td>
+            <td>71%</td>
+            <td>L15-L21</td>
+            <td>Protect tyre life and cover rivals in the pit window.</td>
+          </tr>
+          
+          <tr>
+            <td>Mercedes</td>
+            <td>DEFENSIVE</td>
+            <td>6%</td>
+            <td>94%</td>
+            <td>L14-L20</td>
+            <td>Protect tyre life and cover rivals in the pit window.</td>
+          </tr>
+          
+          <tr>
+            <td>Williams</td>
+            <td>DEFENSIVE</td>
+            <td>8%</td>
+            <td>92%</td>
+            <td>L14-L20</td>
+            <td>Protect tyre life and cover rivals in the pit window.</td>
+          </tr>
+          
+          <tr>
+            <td>Red Bull Racing</td>
+            <td>DEFENSIVE</td>
+            <td>11%</td>
+            <td>89%</td>
+            <td>L13-L19</td>
+            <td>Protect tyre life and cover rivals in the pit window.</td>
+          </tr>
+          
+          <tr>
+            <td>Aston Martin</td>
+            <td>DEFENSIVE</td>
+            <td>7%</td>
+            <td>93%</td>
+            <td>L14-L20</td>
+            <td>Protect tyre life and cover rivals in the pit window.</td>
+          </tr>
+          
+          <tr>
+            <td>Racing Bulls</td>
+            <td>DEFENSIVE</td>
+            <td>10%</td>
+            <td>90%</td>
+            <td>L24-L30</td>
+            <td>Protect tyre life and cover rivals in the pit window.</td>
+          </tr>
+          
+          <tr>
+            <td>Haas F1 Team</td>
+            <td>AGGRESSIVE</td>
+            <td>85%</td>
+            <td>15%</td>
+            <td>L15-L21</td>
+            <td>Push undercut threat and attack around trigger lap.</td>
+          </tr>
+          
+          <tr>
+            <td>Cadillac</td>
+            <td>DEFENSIVE</td>
+            <td>5%</td>
+            <td>95%</td>
+            <td>L12-L18</td>
+            <td>Protect tyre life and cover rivals in the pit window.</td>
+          </tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h3>Compound Pace Delta Visual</h3>
+      <p class="hint">Bar length shows pace deficit to each team's fastest compound projection (s).</p>
+      <div class="compound-legend">
+        <span><span class="swatch soft-swatch"></span>Soft</span>
+        <span><span class="swatch med-swatch"></span>Medium</span>
+        <span><span class="swatch hard-swatch"></span>Hard</span>
+      </div>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">Audi</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 79.1%"></div></div>
+          <span class="compound-value">4.256 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 36.7%"></div></div>
+          <span class="compound-value">1.972 s</span>
+        </div>
+      </article>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">Ferrari</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 69.7%"></div></div>
+          <span class="compound-value">3.752 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 71.3%"></div></div>
+          <span class="compound-value">3.835 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+      </article>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">McLaren</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 64.6%"></div></div>
+          <span class="compound-value">3.473 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 66.9%"></div></div>
+          <span class="compound-value">3.598 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+      </article>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">Alpine</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 39.4%"></div></div>
+          <span class="compound-value">2.120 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 10.2%"></div></div>
+          <span class="compound-value">0.550 s</span>
+        </div>
+      </article>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">Mercedes</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 31.8%"></div></div>
+          <span class="compound-value">1.710 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 33.3%"></div></div>
+          <span class="compound-value">1.793 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+      </article>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">Williams</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 25.9%"></div></div>
+          <span class="compound-value">1.392 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 27.4%"></div></div>
+          <span class="compound-value">1.476 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+      </article>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">Red Bull Racing</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 29.2%"></div></div>
+          <span class="compound-value">1.571 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 22.2%"></div></div>
+          <span class="compound-value">1.194 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+      </article>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">Aston Martin</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 39.1%"></div></div>
+          <span class="compound-value">2.102 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 30.7%"></div></div>
+          <span class="compound-value">1.654 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+      </article>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">Racing Bulls</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 31.0%"></div></div>
+          <span class="compound-value">1.670 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 30.8%"></div></div>
+          <span class="compound-value">1.658 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+      </article>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">Haas F1 Team</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 1.6%"></div></div>
+          <span class="compound-value">0.084 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 4.9%"></div></div>
+          <span class="compound-value">0.265 s</span>
+        </div>
+      </article>
+      
+      <article class="compound-team">
+        <div class="compound-team-head">Cadillac</div>
+        <div class="compound-row">
+          <span class="compound-label">Soft</span>
+          <div class="pacebar"><div class="soft" style="width: 29.2%"></div></div>
+          <span class="compound-value">1.571 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Medium</span>
+          <div class="pacebar"><div class="med" style="width: 100.0%"></div></div>
+          <span class="compound-value">5.379 s</span>
+        </div>
+        <div class="compound-row">
+          <span class="compound-label">Hard</span>
+          <div class="pacebar"><div class="hard" style="width: 0.0%"></div></div>
+          <span class="compound-value">0.000 s</span>
+        </div>
+      </article>
+      
+      <div class="insight-box">
+        <p class="insight-title">Highlights</p>
+        <ul>
+          
+          <li>Team-best compound split is Hard: 8 team(s), Medium: 1 team(s), Soft: 2 team(s).</li>
+          
+          <li>Strongest absolute compound delta is Audi on Soft (+0.000s to own best baseline).</li>
+          
+          <li>Top compound-efficient teams: Audi (Soft, +0.000s) | Ferrari (Hard, +0.000s) | McLaren (Hard, +0.000s).</li>
+          
+        </ul>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h3>Team Stint Pace By Compound</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Soft Pace</th><th>Medium Pace</th><th>Hard Pace</th></tr></thead>
+        <tbody>
+          
+          <tr><td>Audi</td><td>1:22.239</td><td>1:26.496</td><td>1:24.212</td></tr>
+          
+          <tr><td>Ferrari</td><td>1:25.782</td><td>1:25.866</td><td>1:22.031</td></tr>
+          
+          <tr><td>McLaren</td><td>1:25.741</td><td>1:25.866</td><td>1:22.268</td></tr>
+          
+          <tr><td>Alpine</td><td>1:25.782</td><td>1:23.662</td><td>1:24.212</td></tr>
+          
+          <tr><td>Mercedes</td><td>1:25.782</td><td>1:25.866</td><td>1:24.073</td></tr>
+          
+          <tr><td>Williams</td><td>1:25.782</td><td>1:25.866</td><td>1:24.391</td></tr>
+          
+          <tr><td>Red Bull Racing</td><td>1:25.782</td><td>1:25.406</td><td>1:24.212</td></tr>
+          
+          <tr><td>Aston Martin</td><td>1:26.314</td><td>1:25.866</td><td>1:24.212</td></tr>
+          
+          <tr><td>Racing Bulls</td><td>1:25.882</td><td>1:25.870</td><td>1:24.212</td></tr>
+          
+          <tr><td>Haas F1 Team</td><td>1:25.782</td><td>1:25.866</td><td>1:26.047</td></tr>
+          
+          <tr><td>Cadillac</td><td>1:25.782</td><td>1:29.591</td><td>1:24.212</td></tr>
+          
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section card">
+      <h3>Team Degradation Outlook</h3>
+      <table>
+        <thead><tr><th>Team</th><th>Mean Deg (s/lap)</th><th>Avg Expected Stops</th></tr></thead>
+        <tbody>
+          
+          <tr><td>Racing Bulls</td><td>0.03</td><td>1.4</td></tr>
+          
+          <tr><td>Alpine</td><td>0.055</td><td>1.39</td></tr>
+          
+          <tr><td>Aston Martin</td><td>0.07</td><td>1.63</td></tr>
+          
+          <tr><td>Ferrari</td><td>0.07</td><td>1.65</td></tr>
+          
+          <tr><td>Haas F1 Team</td><td>0.07</td><td>1.63</td></tr>
+          
+          <tr><td>McLaren</td><td>0.07</td><td>1.65</td></tr>
+          
+          <tr><td>Mercedes</td><td>0.07</td><td>1.63</td></tr>
+          
+          <tr><td>Williams</td><td>0.07</td><td>1.64</td></tr>
+          
+          <tr><td>Audi</td><td>0.09</td><td>1.76</td></tr>
+          
+          <tr><td>Cadillac</td><td>0.09</td><td>1.77</td></tr>
+          
+          <tr><td>Red Bull Racing</td><td>0.09</td><td>1.78</td></tr>
+          
+        </tbody>
       </table>
     </section>
   </div>
+  
 </body>
 </html>

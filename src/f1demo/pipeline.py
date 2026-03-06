@@ -34,6 +34,8 @@ from .utils import ensure_dirs, write_json
 
 def _chart_highlights(chart_title: str, session_name: str, top5: list[dict], laps_count: int) -> list[str]:
     chart_title_l = chart_title.lower()
+    session_l = session_name.lower()
+    is_practice = session_l.startswith("fp") or "practice" in session_l
     rows = [r for r in top5 if isinstance(r, dict)]
 
     def _num(v: object) -> float | None:
@@ -99,6 +101,11 @@ def _chart_highlights(chart_title: str, session_name: str, top5: list[dict], lap
         s1_best = min(s1, key=lambda x: x[0])
         s2_best = min(s2, key=lambda x: x[0])
         s3_best = min(s3, key=lambda x: x[0])
+        s1_spread = max(v for v, _ in s1) - s1_best[0]
+        s2_spread = max(v for v, _ in s2) - s2_best[0]
+        s3_spread = max(v for v, _ in s3) - s3_best[0]
+        spread_map = [("S1", s1_spread), ("S2", s2_spread), ("S3", s3_spread)]
+        widest_sector, widest_spread = max(spread_map, key=lambda x: x[1])
         unique_sector_leaders = len({s1_best[1], s2_best[1], s3_best[1]})
         s1_team = driver_team.get(s1_best[1], "")
         s2_team = driver_team.get(s2_best[1], "")
@@ -122,17 +129,29 @@ def _chart_highlights(chart_title: str, session_name: str, top5: list[dict], lap
         return [
             f"The heatmap is anchored to S1/S2/S3 references of {s1_best[0]:.3f}s, {s2_best[0]:.3f}s, and {s3_best[0]:.3f}s respectively.",
             f"Because {unique_sector_leaders} driver(s) share sector benchmarks, the chart highlights where contenders trade strengths across the lap.",
-            "Rows with one bright sector and two dark sectors usually indicate setup specialization that limits full-lap conversion.",
+            f"{widest_sector} has the widest sector spread at +{widest_spread:.3f}s from best to slowest, making it the key separator in this session.",
         ]
 
     if "sector delta heatmap" in chart_title_l:
+        if is_practice:
+            return [
+                f"{session_name} sector map is anchored to {leader_name}{f' ({leader_team})' if leader_team else ''} at {lead_pace_fmt}, with the first chase gap at +{gap_fmt}.",
+                f"The spread expands from +{p3_gap_fmt} at P3 to +{p10_gap_fmt} at P10, which usually indicates multiple run plans (fuel/compound targets) rather than one pure quali simulation.",
+                "Large single-sector losses in practice can come from conservative deployment and heavier fuel, so treat red cells as directionally useful, not absolute qualifying truth.",
+            ]
         return [
             f"{session_name} pace leader is {leader_name}{f' ({leader_team})' if leader_team else ''} at {lead_pace_fmt}, and the heatmap maps where others lose time by sector.",
             f"Front reference spread is +{gap_fmt} to P2 and +{p3_gap_fmt} to P3, so concentrated hot cells usually explain most of that deficit.",
-            "Prioritize drivers with one dominant weak sector first, because that is typically the fastest setup or execution gain to recover.",
+            f"The spread grows to +{p5_gap_fmt} at P5 and +{p10_gap_fmt} at P10, so sector losses are cumulative rather than isolated to one driver pair.",
         ]
 
     if "mean vs top speed" in chart_title_l:
+        if is_practice:
+            return [
+                f"{session_name} speed profile links team-level mean speed to terminal speed, with the pace reference set by {leader_name}{f' ({leader_team})' if leader_team else ''}.",
+                "High top-speed but weaker mean-speed points typically indicate lower drag or stronger deployment, while high mean-speed with modest top-speed usually reflects downforce-biased setup.",
+                "Practice caveat: engine mode masking and fuel-load variation can hide true one-lap pace, so use this chart as aero/efficiency direction rather than final ranking.",
+            ]
         return [
             f"The pace reference is {leader_name}{f' ({leader_team})' if leader_team else ''}, with {runner_name} close behind at +{gap_fmt}.",
             f"Top-table spread to P5 is +{p5_gap_fmt}, so this plot is best read as an explanation of why similarly ranked teams reach pace differently.",
@@ -206,13 +225,32 @@ def _chart_highlights(chart_title: str, session_name: str, top5: list[dict], lap
         laps_runner = _num(runner.get("num_laps"))
         laps_third = _num(third.get("num_laps"))
         laps_txt = f" over {int(laps_leader)} laps" if laps_leader is not None else ""
+        if is_practice:
+            return [
+                f"{leader_name}{f' ({leader_team})' if leader_team else ''} is the pace anchor at {lead_pace_fmt}{laps_txt}, while {runner_name} and {third_name} sit at +{gap_fmt} and +{p3_gap_fmt}.",
+                "Drivers low on the chart with larger bubbles are showing repeatable race-run behavior; high vertical spread often points to mixed fuel targets, traffic, or setup experimentation.",
+                "Potential sandbagging signal: if a team shows strong consistency and lap-count depth without headline top pace, they may be running conservative engine modes or heavier fuel.",
+            ]
         return [
             f"{leader_name}{f' ({leader_team})' if leader_team else ''} leads on table pace at {lead_pace_fmt}{laps_txt}, providing the benchmark point on this scatter.",
             f"{runner_name} is +{gap_fmt} on {int(laps_runner) if laps_runner is not None else 'N/A'} laps, while {third_name} is +{p3_gap_fmt} on {int(laps_third) if laps_third is not None else 'N/A'} laps.",
             f"Pace spread grows to +{p10_gap_fmt} by P10 in this session, so high vertical scatter at small gaps is the main consistency risk signal here.",
         ]
 
+    if "long-run pace" in chart_title_l:
+        return [
+            f"Long-run reference is {leader_name}{f' ({leader_team})' if leader_team else ''} at {lead_pace_fmt}, with {runner_name} and {third_name} at +{gap_fmt} and +{p3_gap_fmt}.",
+            "Each bar uses a representative long stint (minimum 3 laps, excluding opening stint laps), so this compares sustained run pace instead of single-lap peaks.",
+            f"The separation extends to +{p5_gap_fmt} by P5 and +{p10_gap_fmt} by P10, indicating how quickly long-run degradation risk diverges through the order.",
+        ]
+
     if "pace distribution" in chart_title_l or "pace box" in chart_title_l:
+        if is_practice:
+            return [
+                f"{session_name} includes {laps_count} cleaned timed laps, with {leader_name}{f' ({leader_team})' if leader_team else ''} setting the top reference at {lead_pace_fmt}.",
+                f"The order fans from +{p5_gap_fmt} at P5 to +{p10_gap_fmt} at P10; this shape is typical when teams split between short-run prep and long-run programs.",
+                "Practice interpretation: wide boxes are often run-plan noise (fuel, traffic, prep laps), while narrow boxes with decent pace usually indicate a stable baseline rather than peak mode.",
+            ]
         return [
             f"{leader_name}{f' ({leader_team})' if leader_team else ''} sets the pace reference at {lead_pace_fmt}; {runner_name} is +{gap_fmt} and {third_name} is +{p3_gap_fmt}.",
             f"Session spread is +{p5_gap_fmt} by P5 and +{p10_gap_fmt} by P10, which quantifies how quickly the pace ladder opens in this chart.",
@@ -220,10 +258,16 @@ def _chart_highlights(chart_title: str, session_name: str, top5: list[dict], lap
         ]
 
     if "median pace delta to fastest" in chart_title_l:
+        if is_practice:
+            return [
+                f"Median pace baseline is {leader_name}{f' ({leader_team})' if leader_team else ''} at {lead_pace_fmt}, with immediate challengers at +{gap_fmt} and +{p3_gap_fmt}.",
+                f"Delta growth to +{p5_gap_fmt} (P5) and +{p10_gap_fmt} (P10) suggests at least two pace tiers, but practice tiers can compress once fuel loads converge.",
+                "Potential hidden-pace context: teams may suppress headline pace via higher fuel or conservative power modes, so prioritize repeatability and stint behavior over absolute median delta alone.",
+            ]
         return [
             f"Median pace baseline is {leader_name}{f' ({leader_team})' if leader_team else ''} at {lead_pace_fmt}, with {runner_name} and {third_name} at +{gap_fmt} and +{p3_gap_fmt}.",
-            "Small median deltas indicate sustainable run-level pace, not just one-off peak lap execution.",
-            "If the delta curve opens gradually, the field is compressed; sharp breaks usually indicate pace tier boundaries.",
+            f"The delta to P5 is +{p5_gap_fmt} and to P10 is +{p10_gap_fmt}, quantifying where the front group separates from the rest.",
+            f"This view uses cleaned timed laps from {session_name}, so it reflects repeatable run pace rather than single push-lap outliers.",
         ]
 
     if "best lap delta to fastest" in chart_title_l:
@@ -482,6 +526,9 @@ def run_pipeline(
     for session_name, sess in bundle.sessions.items():
         if session_name.startswith("FP"):
             laps = laps_dataframe(sess, session_name)
+            if laps.empty:
+                print(f"[INFO] Skipping {session_name}: no loaded lap data yet.")
+                continue
             colors = _colors_for_laps(sess, laps)
             team_colors = _team_colors_for_laps(sess, laps)
             summary = session_summary(laps)
@@ -543,7 +590,7 @@ def run_pipeline(
                 team_colors=team_colors,
             )
             for c in charts:
-                c["insights"] = _chart_highlights(c["title"], session_name, table_rows, int(laps.shape[0]))
+                c["insights"] = c.get("insights") or _chart_highlights(c["title"], session_name, table_rows, int(laps.shape[0]))
             practice_payload.append(
                 {
                     "session_name": session_name,
@@ -610,7 +657,7 @@ def run_pipeline(
                 if telem_chart:
                     charts.append(telem_chart)
                 for c in charts:
-                    c["insights"] = _chart_highlights(c["title"], label, table_rows, int(laps.shape[0]))
+                    c["insights"] = c.get("insights") or _chart_highlights(c["title"], label, table_rows, int(laps.shape[0]))
                 quali_payload.append(
                     {
                         "session_name": label,
@@ -624,12 +671,18 @@ def run_pipeline(
 
         if session_name == "Race":
             laps = laps_dataframe(sess, session_name)
+            if laps.empty:
+                print("[INFO] Skipping Race analysis: race lap data not available yet.")
+                continue
             colors = _colors_for_laps(sess, laps)
             summary = session_summary(laps)
             teammate = teammate_delta(summary)
             stints = stint_summary(laps)
             export_session_tables(round_table_dir, session_name, summary, teammate, stints)
             race_results = results_dataframe(sess, session_name)
+            if race_results.empty or not {"Driver", "Team", "Position"}.issubset(set(race_results.columns)):
+                print("[INFO] Race results not available yet; race tables/charts will remain empty.")
+                continue
             stint_counts = (
                 stints[stints["lap_count"] >= 2]
                 .groupby("Driver", as_index=False)["Stint"]
@@ -665,7 +718,7 @@ def run_pipeline(
                 driver_colors=colors,
             )
             for c in charts:
-                c["insights"] = _chart_highlights(c["title"], session_name, table_rows, int(laps.shape[0]))
+                c["insights"] = c.get("insights") or _chart_highlights(c["title"], session_name, table_rows, int(laps.shape[0]))
             race_payload = {
                 "session_name": session_name,
                 "drivers": int(summary.shape[0]),
