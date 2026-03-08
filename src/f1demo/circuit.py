@@ -311,9 +311,10 @@ def build_circuit_overview(bundle: object, history_years: int = 5) -> dict[str, 
         best = min(fastest_records, key=lambda r: r["lap_seconds"])
         hist_fast = f"{_format_laptime(best['lap_seconds'])} ({best['driver']} - {best['season']})"
 
-    # Current weekend fastest lap: prefer qualifying pole; fallback to FP2/FP1/FP3 then race.
+    # Current weekend fastest lap: absolute best across all loaded sessions.
     weekend_fast = None
-    for sname in ["Qualifying", "FP2", "FP1", "FP3", "Race"]:
+    weekend_rows: list[tuple[float, str, str]] = []
+    for sname in ["Qualifying", "FP3", "FP2", "FP1", "Race"]:
         sess = bundle.sessions.get(sname)
         if sess is None:
             continue
@@ -326,8 +327,10 @@ def build_circuit_overview(bundle: object, history_years: int = 5) -> dict[str, 
             continue
         j = slaps["lap_seconds"].idxmin()
         row = slaps.loc[j]
-        weekend_fast = f"{_format_laptime(row['lap_seconds'])} ({row.get('Driver', '')} - {sname})"
-        break
+        weekend_rows.append((float(row["lap_seconds"]), str(row.get("Driver", "")), sname))
+    if weekend_rows:
+        best_t, best_d, best_s = min(weekend_rows, key=lambda x: x[0])
+        weekend_fast = f"{_format_laptime(best_t)} ({best_d} - {best_s})"
 
     turns_val = _turn_count_from_bundle(bundle)
     gear_val = _gear_changes_from_bundle(bundle)

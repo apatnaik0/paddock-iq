@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+import fastf1
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
@@ -10,7 +11,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 
 from .analysis import clean_session_laps
-from .data import laps_dataframe, load_sessions
+from .data import init_fastf1_cache, laps_dataframe, load_sessions
 
 
 @dataclass
@@ -33,6 +34,25 @@ def _format_laptime(seconds: float | int | None) -> str:
     mins = int(total // 60)
     secs = total - mins * 60
     return f"{mins}:{secs:06.3f}"
+
+
+def _normalize_team_name(team: str) -> str:
+    t = (team or "").strip()
+    key = t.lower()
+    alias = {
+        "kick sauber": "Audi",
+        "sauber": "Audi",
+        "alfa romeo": "Audi",
+        "alfa romeo racing": "Audi",
+        "rb": "Racing Bulls",
+        "alphatauri": "Racing Bulls",
+        "scuderia alphatauri": "Racing Bulls",
+        "toro rosso": "Racing Bulls",
+        "renault": "Alpine",
+        "racing point": "Aston Martin",
+        "force india": "Aston Martin",
+    }
+    return alias.get(key, t)
 
 
 def _add_tyre_age(df: pd.DataFrame) -> pd.DataFrame:
@@ -242,6 +262,203 @@ def _strategy_training_frame(
     return pd.concat(frames, ignore_index=True)
 
 
+def _historical_compound_prior(
+    events: tuple[tuple[int, int], ...] | None,
+) -> pd.DataFrame:
+    """
+    Team-level compound prior from same-GP historical races.
+    Uses only race laps from the provided events (typically last 5 editions).
+    """
+    cols = [
+        "Team",
+        "hist_soft_share",
+        "hist_medium_share",
+        "hist_hard_share",
+        "hist_soft_start_share",
+        "hist_medium_start_share",
+        "hist_hard_start_share",
+        "hist_soft_stint1_laps",
+        "hist_medium_stint1_laps",
+        "hist_hard_stint1_laps",
+        "hist_events_used",
+    ]
+    if not events:
+        return pd.DataFrame(columns=cols)
+
+    init_fastf1_cache()
+    usage_rows: list[dict[str, Any]] = []
+    start_rows: list[dict[str, Any]] = []
+    stint_rows: list[dict[str, Any]] = []
+    used_events = 0
+    newest_year = max((int(y) for y, _ in events), default=0)
+    for yr, rnd in events:
+        try:
+            race = fastf1.get_session(int(yr), int(rnd), "Race")
+            race.load(laps=True, telemetry=False, weather=False, messages=False)
+        except Exception:
+            continue
+        laps = laps_dataframe(race, "Race")
+        if laps.empty:
+            continue
+        work = laps.copy()
+        work["Compound"] = work["Compound"].fillna("UNKNOWN").astype(str).str.upper()
+        work = work[work["Compound"].isin(["SOFT", "MEDIUM", "HARD"])].copy()
+        if work.empty:
+            continue
+        used_events += 1
+        year_w = 1.0 + 0.18 * max(0, newest_year - int(yr))
+        recency_w = 1.0 / year_w
+
+        # Usage share by race laps.
+        team_comp = (
+            work.groupby(["Team", "Compound"], as_index=False)
+            .agg(laps=("lap_seconds", "count"))
+        )
+        team_comp["Team"] = team_comp["Team"].astype(str).map(_normalize_team_name)
+        team_comp = team_comp.groupby(["Team", "Compound"], as_index=False)["laps"].sum()
+        team_tot = team_comp.groupby("Team", as_index=False).agg(total_laps=("laps", "sum"))
+        team_comp = team_comp.merge(team_tot, on="Team", how="left")
+        team_comp["share"] = team_comp["laps"] / team_comp["total_laps"].replace(0, np.nan)
+        for _, r in team_comp.iterrows():
+            usage_rows.append(
+                {
+                    "Team": str(r["Team"]),
+                    "Compound": str(r["Compound"]),
+                    "share": float(r["share"]) if pd.notna(r["share"]) else np.nan,
+                    "w": float(recency_w),
+                }
+            )
+
+        # Start compound share from first stint per driver.
+        st = work.copy()
+        st["Stint"] = pd.to_numeric(st["Stint"], errors="coerce")
+        st["LapNumber"] = pd.to_numeric(st["LapNumber"], errors="coerce")
+        st = st.dropna(subset=["Team", "Driver", "Stint", "LapNumber"])
+        if not st.empty:
+            first = (
+                st[st["Stint"] == 1]
+                .sort_values(["Team", "Driver", "LapNumber"])
+                .groupby(["Team", "Driver"], as_index=False)
+                .first()[["Team", "Driver", "Compound"]]
+            )
+            first["Team"] = first["Team"].astype(str).map(_normalize_team_name)
+            if not first.empty:
+                start = (
+                    first.groupby(["Team", "Compound"], as_index=False)
+                    .agg(n=("Driver", "count"))
+                )
+                start_tot = start.groupby("Team", as_index=False).agg(total=("n", "sum"))
+                start = start.merge(start_tot, on="Team", how="left")
+                start["share"] = start["n"] / start["total"].replace(0, np.nan)
+                for _, r in start.iterrows():
+                    start_rows.append(
+                        {
+                            "Team": str(r["Team"]),
+                            "Compound": str(r["Compound"]),
+                            "share": float(r["share"]) if pd.notna(r["share"]) else np.nan,
+                            "w": float(recency_w),
+                        }
+                    )
+            # First-stint length by starting compound (helps identify durable starts).
+            first_stint = (
+                st[st["Stint"] == 1]
+                .groupby(["Team", "Driver", "Compound"], as_index=False)
+                .agg(stint1_laps=("LapNumber", "max"))
+            )
+            first_stint["Team"] = first_stint["Team"].astype(str).map(_normalize_team_name)
+            for _, r in first_stint.iterrows():
+                stint_rows.append(
+                    {
+                        "Team": str(r["Team"]),
+                        "Compound": str(r["Compound"]),
+                        "stint1_laps": float(r["stint1_laps"]),
+                        "w": float(recency_w),
+                    }
+                )
+
+    if used_events == 0 or not usage_rows:
+        return pd.DataFrame(columns=cols)
+
+    usage = pd.DataFrame(usage_rows).dropna(subset=["share", "w"])
+    if usage.empty:
+        return pd.DataFrame(columns=cols)
+    usage["share_w"] = usage["share"] * usage["w"]
+    usage = (
+        usage.groupby(["Team", "Compound"], as_index=False)
+        .agg(share_w=("share_w", "sum"), w_sum=("w", "sum"))
+    )
+    usage["share"] = usage["share_w"] / usage["w_sum"].replace(0, np.nan)
+    usage = usage.pivot(index="Team", columns="Compound", values="share").fillna(0.0)
+    for c in ["SOFT", "MEDIUM", "HARD"]:
+        if c not in usage.columns:
+            usage[c] = 0.0
+    usage = usage[["SOFT", "MEDIUM", "HARD"]].rename(
+        columns={
+            "SOFT": "hist_soft_share",
+            "MEDIUM": "hist_medium_share",
+            "HARD": "hist_hard_share",
+        }
+    )
+
+    if start_rows:
+        start = pd.DataFrame(start_rows).dropna(subset=["share", "w"])
+        start["share_w"] = start["share"] * start["w"]
+        start = (
+            start.groupby(["Team", "Compound"], as_index=False)
+            .agg(share_w=("share_w", "sum"), w_sum=("w", "sum"))
+        )
+        start["share"] = start["share_w"] / start["w_sum"].replace(0, np.nan)
+        start = start.pivot(index="Team", columns="Compound", values="share").fillna(0.0)
+        for c in ["SOFT", "MEDIUM", "HARD"]:
+            if c not in start.columns:
+                start[c] = 0.0
+        start = start[["SOFT", "MEDIUM", "HARD"]].rename(
+            columns={
+                "SOFT": "hist_soft_start_share",
+                "MEDIUM": "hist_medium_start_share",
+                "HARD": "hist_hard_start_share",
+            }
+        )
+    else:
+        start = pd.DataFrame(
+            columns=["hist_soft_start_share", "hist_medium_start_share", "hist_hard_start_share"]
+        )
+
+    if stint_rows:
+        st1 = pd.DataFrame(stint_rows).dropna(subset=["stint1_laps", "w"])
+        st1["laps_w"] = st1["stint1_laps"] * st1["w"]
+        st1 = (
+            st1.groupby(["Team", "Compound"], as_index=False)
+            .agg(laps_w=("laps_w", "sum"), w_sum=("w", "sum"))
+        )
+        st1["stint1_laps"] = st1["laps_w"] / st1["w_sum"].replace(0, np.nan)
+        st1 = st1.pivot(index="Team", columns="Compound", values="stint1_laps").fillna(0.0)
+        for c in ["SOFT", "MEDIUM", "HARD"]:
+            if c not in st1.columns:
+                st1[c] = 0.0
+        st1 = st1[["SOFT", "MEDIUM", "HARD"]].rename(
+            columns={
+                "SOFT": "hist_soft_stint1_laps",
+                "MEDIUM": "hist_medium_stint1_laps",
+                "HARD": "hist_hard_stint1_laps",
+            }
+        )
+    else:
+        st1 = pd.DataFrame(columns=["hist_soft_stint1_laps", "hist_medium_stint1_laps", "hist_hard_stint1_laps"])
+
+    out = usage.merge(start, left_index=True, right_index=True, how="left").merge(st1, left_index=True, right_index=True, how="left").reset_index()
+    out["hist_events_used"] = int(used_events)
+    for c in ["hist_soft_start_share", "hist_medium_start_share", "hist_hard_start_share"]:
+        if c not in out.columns:
+            out[c] = 0.0
+        out[c] = out[c].fillna(0.0)
+    for c in ["hist_soft_stint1_laps", "hist_medium_stint1_laps", "hist_hard_stint1_laps"]:
+        if c not in out.columns:
+            out[c] = 0.0
+        out[c] = out[c].fillna(0.0)
+    return out[cols]
+
+
 def _make_regressor(seed: int) -> Pipeline:
     return Pipeline(
         steps=[
@@ -381,6 +598,12 @@ def build_strategy_overview(
     if bool(ml_meta.get("enabled", False)):
         # Keep current-weekend signals dominant and use ML as a secondary stabilizer.
         ml_weight = float(np.clip(0.10 + 0.22 * float(ml_meta.get("confidence", 0.55)), 0.18, 0.30))
+    event_name = str(getattr(bundle, "event_name", "") or "").strip().lower()
+    prefer_one_stop = bool(int(getattr(bundle, "season", 0)) == 2026 and int(getattr(bundle, "round_number", 0)) == 1 and "australian" in event_name)
+    hist_prior_df = _historical_compound_prior(strategy_train_events)
+    hist_by_team: dict[str, dict[str, Any]] = {}
+    if not hist_prior_df.empty:
+        hist_by_team = hist_prior_df.set_index("Team").to_dict(orient="index")
 
     for team in ordered_teams:
         tpace = pace[pace["Team"] == team].copy()
@@ -391,21 +614,73 @@ def build_strategy_overview(
         for c in ["SOFT", "MEDIUM", "HARD"]:
             comp_pace.setdefault(c, float(global_comp_pace.get(c, tpace["median_pace_s"].median())))
 
+        # Hybrid compound selection:
+        # - current weekend pace/degradation (heuristic primary)
+        # - same-GP historical stint usage from last editions (prior secondary)
         ordered_comp = sorted(comp_pace.items(), key=lambda x: x[1])
-        # Soft can be excluded from the recommended strategy if long-run estimate is clearly weaker.
+        hist_row = hist_by_team.get(_normalize_team_name(team), {})
+        hist_share = {
+            "SOFT": float(hist_row.get("hist_soft_share", 1.0 / 3.0)),
+            "MEDIUM": float(hist_row.get("hist_medium_share", 1.0 / 3.0)),
+            "HARD": float(hist_row.get("hist_hard_share", 1.0 / 3.0)),
+        }
+        hist_start = {
+            "SOFT": float(hist_row.get("hist_soft_start_share", 1.0 / 3.0)),
+            "MEDIUM": float(hist_row.get("hist_medium_start_share", 1.0 / 3.0)),
+            "HARD": float(hist_row.get("hist_hard_start_share", 1.0 / 3.0)),
+        }
+        hist_stint1 = {
+            "SOFT": float(hist_row.get("hist_soft_stint1_laps", 0.0)),
+            "MEDIUM": float(hist_row.get("hist_medium_stint1_laps", 0.0)),
+            "HARD": float(hist_row.get("hist_hard_stint1_laps", 0.0)),
+        }
+        tsl = slopes[slopes["Team"] == team]
+        slope_map = {r["Compound"]: float(r["deg_s_per_lap"]) for _, r in tsl.iterrows()}
+
+        # Soft start gate:
+        # requires long-run viability + meaningful historical same-GP support.
         medium_p = comp_pace.get("MEDIUM", np.inf)
         hard_p = comp_pace.get("HARD", np.inf)
         soft_p = comp_pace.get("SOFT", np.inf)
-        use_soft = soft_p <= min(medium_p, hard_p) + 0.25
-        candidate = [c for c, _ in ordered_comp if (c != "SOFT" or use_soft)]
+        base_comp = float(min(comp_pace.values()))
+        comp_delta = {c: float(comp_pace[c] - base_comp) for c in ["SOFT", "MEDIUM", "HARD"]}
+        soft_deg = float(slope_map.get("SOFT", default_slopes["SOFT"]))
+        med_deg = float(slope_map.get("MEDIUM", default_slopes["MEDIUM"]))
+        hard_deg = float(slope_map.get("HARD", default_slopes["HARD"]))
+        soft_long = soft_p + soft_deg * 9.0
+        med_long = medium_p + med_deg * 9.0
+        hard_long = hard_p + hard_deg * 9.0
+
+        soft_hist_support = 0.55 * hist_start["SOFT"] + 0.45 * hist_share["SOFT"]
+        soft_durable_hist = hist_stint1["SOFT"] >= max(8.0, 0.20 * total_laps)
+        soft_long_run_ok = soft_long <= min(med_long, hard_long) + 0.06
+        soft_deg_ok = soft_deg <= (med_deg + 0.015)
+        use_soft_start = bool(soft_long_run_ok and soft_deg_ok and (soft_hist_support >= 0.28 or soft_durable_hist))
+
+        comp_score = {
+            c: (
+                comp_delta[c]
+                + 0.28 * (1.0 - hist_share[c])   # penalize compounds rarely used in recent same-GP races
+                + 0.20 * (1.0 - hist_start[c])   # penalize unlikely opening compounds
+            )
+            for c in ["SOFT", "MEDIUM", "HARD"]
+        }
+        # Add long-run/race-pace penalty so short-run soft headline pace doesn't dominate.
+        comp_score["SOFT"] += max(0.0, soft_long - min(med_long, hard_long))
+        comp_score["MEDIUM"] += max(0.0, med_long - min(soft_long, hard_long)) * 0.55
+        comp_score["HARD"] += max(0.0, hard_long - min(soft_long, med_long)) * 0.55
+        if not use_soft_start:
+            comp_score["SOFT"] += 2.00
+
+        ordered_comp = sorted(comp_score.items(), key=lambda x: x[1])
+        # User preference: strategy suggestions should only use Medium/Hard.
+        candidate = [c for c, _ in ordered_comp if c in {"MEDIUM", "HARD"}]
         if len(candidate) < 2:
-            candidate = [c for c, _ in ordered_comp[:2]]
+            candidate = ["MEDIUM", "HARD"]
         if len(candidate) == 2:
             candidate.append(candidate[1])
         best_comp, second_comp, third_comp = candidate[0], candidate[1], candidate[2]
 
-        tsl = slopes[slopes["Team"] == team]
-        slope_map = {r["Compound"]: float(r["deg_s_per_lap"]) for _, r in tsl.iterrows()}
         deg = float(np.nanmedian([slope_map.get(c, default_slopes[c]) for c in ["SOFT", "MEDIUM", "HARD"]]))
         deg = float(np.clip(deg, 0.03, 0.14))
 
@@ -439,6 +714,9 @@ def build_strategy_overview(
         ml_exp = None if ml_exp_raw is None or (isinstance(ml_exp_raw, float) and pd.isna(ml_exp_raw)) else float(ml_exp_raw)
         exp_stops = float(exp_stops_h if ml_exp is None else (1.0 - ml_weight) * exp_stops_h + ml_weight * ml_exp)
         exp_stops = float(np.clip(exp_stops, 1.0, 3.0))
+        # One-race override requested: bias Australia 2026 recommendations toward 1-stop.
+        if prefer_one_stop:
+            exp_stops = float(np.clip(exp_stops - 0.32, 1.0, 3.0))
         stop_mode = int(np.clip(round(exp_stops), 1, 3))
 
         ml_p1_raw = ml_row.get("ml_pit1_lap")
@@ -533,7 +811,7 @@ def build_strategy_overview(
                 "pit1_end": w1e,
                 "pit2_start": w2s,
                 "pit2_end": w2e,
-                "strategy_source": "Hybrid (Heuristic + ML)" if bool(ml_meta.get("enabled", False)) else "Heuristic only",
+                "strategy_source": "Hybrid (Heuristic + Historical Prior + ML)" if bool(ml_meta.get("enabled", False)) else "Heuristic + Historical Prior",
             }
         )
         # Hybrid undercut/overcut edge using heuristic baseline + ML edge estimate.

@@ -581,11 +581,13 @@ def run_pipeline(
             )
             for row in table_rows:
                 row["top5_avg_pace_fmt"] = _format_laptime(row.get("top5_avg_pace_s"))
+            practice_driver_order = [str(r.get("Driver", "")) for r in table_rows if r.get("Driver")]
             charts = build_session_charts(
                 round_plot_dir,
                 session_name,
                 laps,
                 stints,
+                driver_order=practice_driver_order,
                 driver_colors=colors,
                 team_colors=team_colors,
             )

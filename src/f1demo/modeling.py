@@ -8,7 +8,13 @@ import fastf1
 import numpy as np
 import pandas as pd
 
-from .data import init_fastf1_cache, laps_dataframe, load_sessions, results_dataframe
+from .data import (
+    init_fastf1_cache,
+    laps_dataframe,
+    load_sessions,
+    qualifying_parts_dataframes,
+    results_dataframe,
+)
 
 
 @dataclass
@@ -114,6 +120,82 @@ def _event_round_number(season: int, event_name: str) -> int | None:
         return None
 
 
+def _overtake_difficulty(event_name: str | None) -> float:
+    """Return [0,1] where higher means harder overtaking."""
+    name = (event_name or "").strip().lower()
+    # Lightweight circuit prior for race recovery potential.
+    # Values are intentionally conservative and can be tuned later with data.
+    if "monaco" in name:
+        return 0.98
+    if "hungarian" in name or "budapest" in name:
+        return 0.86
+    if "zandvoort" in name or "dutch" in name:
+        return 0.80
+    if "jeddah" in name or "saudi" in name:
+        return 0.72
+    if "australian" in name or "albert park" in name:
+        return 0.66
+    if "imola" in name or "emilia" in name:
+        return 0.74
+    if "singapore" in name:
+        return 0.78
+    if "las vegas" in name or "monza" in name or "baku" in name or "spa" in name:
+        return 0.42
+    return 0.60
+
+
+@lru_cache(maxsize=32)
+def _overtake_difficulty_last5_same_gp(season: int, event_name: str) -> tuple[float, int]:
+    """
+    Data-driven overtaking difficulty from last 5 editions of the same GP.
+    Uses race results only (grid vs finish), no lap/telemetry pull.
+    Returns (difficulty[0..1], races_used).
+    """
+    init_fastf1_cache()
+    name = (event_name or "").strip()
+    if not name:
+        return _overtake_difficulty(name), 0
+
+    difficulties: list[float] = []
+    max_lookback_years = 15
+    for yr in range(season - 1, season - max_lookback_years - 1, -1):
+        if len(difficulties) >= 5:
+            break
+        try:
+            rnd = _event_round_number(yr, name)
+            if rnd is None:
+                continue
+            r = fastf1.get_session(yr, int(rnd), "Race")
+            r.load(laps=False, telemetry=False, weather=False, messages=False)
+            res = results_dataframe(r, "Race")
+            if res.empty:
+                continue
+            work = res[["GridPosition", "Position"]].copy()
+            work["GridPosition"] = pd.to_numeric(work["GridPosition"], errors="coerce")
+            work["Position"] = pd.to_numeric(work["Position"], errors="coerce")
+            work = work.dropna(subset=["GridPosition", "Position"])
+            work = work[(work["GridPosition"] > 0) & (work["Position"] > 0)]
+            if len(work) < 10:
+                continue
+
+            mean_abs_change = float((work["Position"] - work["GridPosition"]).abs().mean())
+            rho = float(work["GridPosition"].corr(work["Position"], method="spearman"))
+            if np.isnan(rho):
+                continue
+
+            # Fewer position changes + stronger grid/finish correlation => harder overtaking.
+            hard_from_moves = float(np.clip(1.0 - (mean_abs_change - 1.5) / 5.0, 0.0, 1.0))
+            hard_from_rho = float(np.clip((rho + 1.0) / 2.0, 0.0, 1.0))
+            diff = 0.60 * hard_from_rho + 0.40 * hard_from_moves
+            difficulties.append(float(np.clip(diff, 0.0, 1.0)))
+        except Exception:
+            continue
+
+    if difficulties:
+        return float(np.mean(difficulties)), len(difficulties)
+    return _overtake_difficulty(name), 0
+
+
 @lru_cache(maxsize=16)
 def _event_position_priors(prior_season: int, event_name: str) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     init_fastf1_cache()
@@ -212,6 +294,44 @@ def _practice_features(bundle: object) -> pd.DataFrame:
     return drv.merge(team, on="Team", how="left")
 
 
+def _fill_missing_quali_positions(q_session: object, q_res: pd.DataFrame) -> pd.DataFrame:
+    out = q_res.copy()
+    out["quali_position"] = pd.to_numeric(out["quali_position"], errors="coerce")
+    missing = out["quali_position"].isna()
+    if not missing.any():
+        return out
+
+    base_pos = int(out["quali_position"].dropna().max()) if out["quali_position"].notna().any() else 0
+    next_pos = base_pos + 1
+
+    # First, recover missing entries from Q1 best laps (covers no-Q2/no-Q3 exits).
+    try:
+        q_parts = qualifying_parts_dataframes(q_session)
+        q1 = q_parts.get("Q1")
+        if q1 is not None and not q1.empty:
+            q1b = (
+                q1.groupby("Driver", as_index=False)["lap_seconds"]
+                .min()
+                .sort_values("lap_seconds")
+            )
+            miss_drivers = set(out.loc[missing, "Driver"].astype(str).tolist())
+            q1b = q1b[q1b["Driver"].astype(str).isin(miss_drivers)]
+            for drv in q1b["Driver"].astype(str).tolist():
+                idx = out.index[(out["Driver"].astype(str) == drv) & (out["quali_position"].isna())]
+                if len(idx) == 0:
+                    continue
+                out.loc[idx[0], "quali_position"] = float(next_pos)
+                next_pos += 1
+    except Exception:
+        pass
+
+    # Any remaining no-time/no-lap entries: keep official results ordering and append.
+    for idx in out.index[out["quali_position"].isna()].tolist():
+        out.loc[idx, "quali_position"] = float(next_pos)
+        next_pos += 1
+    return out
+
+
 def _round_feature_frame(
     season: int,
     round_number: int,
@@ -229,6 +349,7 @@ def _round_feature_frame(
         raise RuntimeError("Need Qualifying and Race results for target round output.")
 
     q_res = results_dataframe(q, "Qualifying")[["Driver", "Position"]].rename(columns={"Position": "quali_position"})
+    q_res = _fill_missing_quali_positions(q, q_res)
     r_res = results_dataframe(r, "Race")[["Driver", "Position"]].rename(columns={"Position": "race_position"})
     out = feats.merge(q_res, on="Driver", how="left").merge(r_res, on="Driver", how="left")
     out["quali_position"] = pd.to_numeric(out["quali_position"], errors="coerce")
@@ -238,6 +359,7 @@ def _round_feature_frame(
     out = _attach_priors(out, ps, event_name=str(getattr(b, "event_name", "")))
     out["season"] = season
     out["round"] = round_number
+    out["event_name"] = str(getattr(b, "event_name", ""))
     return out
 
 
@@ -260,6 +382,13 @@ def train_and_predict(
 ) -> ModelOutputs:
     target = target_round_df.copy()
     metrics: dict[str, Any] = {}
+    event_name = str(target.get("event_name", pd.Series([""])).iloc[0]) if not target.empty else ""
+    season_val = int(pd.to_numeric(target.get("season", pd.Series([np.nan])).iloc[0], errors="coerce")) if not target.empty else np.nan
+    if pd.isna(season_val):
+        overtake_difficulty = _overtake_difficulty(event_name)
+        od_races_used = 0
+    else:
+        overtake_difficulty, od_races_used = _overtake_difficulty_last5_same_gp(int(season_val), event_name)
 
     # Qualifying prediction:
     # current weekend pace + previous season qualifying priors (driver + team),
@@ -281,7 +410,11 @@ def train_and_predict(
     # Race prediction:
     # weekend pace + qualifying position + previous season race priors (driver + team),
     # with extra weight for same-circuit prior
-    quali_input = pd.to_numeric(target["quali_position"], errors="coerce").fillna(target["pred_quali_position"])
+    quali_input = pd.to_numeric(target["quali_position"], errors="coerce")
+    if quali_input.isna().any():
+        tail_base = int(quali_input.dropna().max()) if quali_input.notna().any() else int(len(target))
+        miss_order = pd.to_numeric(target.loc[quali_input.isna(), "pred_quali_position"], errors="coerce").rank(method="first")
+        quali_input.loc[quali_input.isna()] = tail_base + miss_order.values
     quali_rank = _rank_score(quali_input)
     drv_r_rank = _rank_score(target["driver_prev_race_avg"])
     team_r_rank = _rank_score(target["team_prev_race_avg"])
@@ -295,6 +428,11 @@ def train_and_predict(
         + 0.06 * drv_r_c_rank
         + 0.08 * team_r_c_rank
     )
+    # Circuit-aware recovery constraint:
+    # back-grid starts are penalized more on overtaking-limited tracks.
+    backgrid_depth = (quali_rank - 10.0).clip(lower=0.0)
+    backgrid_penalty = overtake_difficulty * (backgrid_depth ** 1.15) * 0.08
+    target["pred_race_score"] = target["pred_race_score"] + backgrid_penalty
     target["pred_race_position"] = target["pred_race_score"].rank(method="first").astype(int)
 
     q_pred = target[["Driver", "pred_quali_position", "quali_position"]].sort_values("pred_quali_position")
@@ -305,7 +443,9 @@ def train_and_predict(
     if r_pred["race_position"].notna().any():
         metrics["race_mae"] = float((r_pred["pred_race_position"] - r_pred["race_position"]).abs().mean())
     metrics["quali_model"] = "weighted_rank:practice+prev_year_quali(driver,team)+circuit_boost"
-    metrics["race_model"] = "weighted_rank:practice+quali+prev_year_race(driver,team)+circuit_boost"
+    metrics["race_model"] = "weighted_rank:practice+quali+prev_year_race(driver,team)+circuit_boost+overtake_penalty"
+    metrics["overtake_difficulty"] = float(overtake_difficulty)
+    metrics["overtake_difficulty_races_used"] = int(od_races_used)
 
     return ModelOutputs(
         quali_predictions=q_pred,

@@ -1393,7 +1393,9 @@ def build_session_charts(
         return charts[:5]
 
     elif session_group == "race":
-        pos = _plot_position_trace(round_plot_dir, session_name, cleaned, driver_order, driver_colors)
+        # Use full race laps for position trace so lap 1/start order is preserved.
+        pos_source = laps_df.copy() if precleaned else laps_df
+        pos = _plot_position_trace(round_plot_dir, session_name, pos_source, driver_order, driver_colors)
         if pos:
             charts.append(pos)
         ltt = _plot_race_lap_time_trace(round_plot_dir, session_name, cleaned, driver_order, driver_colors)
