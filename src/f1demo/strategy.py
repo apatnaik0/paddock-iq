@@ -696,30 +696,45 @@ def build_strategy_overview(
         deg = float(np.nanmedian([slope_map.get(c, default_slopes[c]) for c in ["SOFT", "MEDIUM", "HARD"]]))
         deg = float(np.clip(deg, 0.03, 0.14))
 
-        sig = 1.0 / (1.0 + np.exp(-((deg - 0.065) / 0.012)))
-        p1_h = float(np.clip(0.72 - 0.50 * sig, 0.05, 0.90))
-        p2_h = float(np.clip(0.22 + 0.42 * sig, 0.05, 0.90))
+        # Default to one-stop unless degradation is clearly high.
+        # The prior threshold is intentionally conservative because teams usually
+        # stretch the first stint and accept some pace loss before committing to two stops.
+        sig = 1.0 / (1.0 + np.exp(-((deg - 0.078) / 0.011)))
+        p1_h = float(np.clip(0.84 - 0.54 * sig, 0.10, 0.92))
+        p2_h = float(np.clip(0.13 + 0.36 * sig, 0.06, 0.78))
         p3_h = float(max(0.01, 1.0 - p1_h - p2_h))
         norm = p1_h + p2_h + p3_h
         p1_h, p2_h, p3_h = p1_h / norm, p2_h / norm, p3_h / norm
         exp_stops_h = 1.0 * p1_h + 2.0 * p2_h + 3.0 * p3_h
         stop_mode_h = int(np.clip(round(exp_stops_h), 1, 3))
 
+        start_min_laps = {
+            "HARD": max(20, int(round(0.34 * total_laps))),
+            "MEDIUM": max(16, int(round(0.28 * total_laps))),
+            "SOFT": max(10, int(round(0.18 * total_laps))),
+        }
+        first_stint_min = int(start_min_laps.get(best_comp, 14))
+        second_stint_min = int(start_min_laps.get(second_comp, 14))
+
         if stop_mode_h == 1:
-            c1h = int(0.48 * total_laps - np.clip((deg - 0.06) * 120, -6, 6))
-            c1h = int(np.clip(c1h, 6, total_laps - 6))
-            h_w1s, h_w1e = max(8, c1h - 3), min(total_laps - 8, c1h + 3)
+            one_stop_anchor = 0.56 if best_comp == "HARD" else 0.50 if best_comp == "MEDIUM" else 0.42
+            c1h = int(one_stop_anchor * total_laps - np.clip((deg - 0.072) * 95, -4, 4))
+            c1h = int(np.clip(c1h, first_stint_min, total_laps - 8))
+            h_w1s, h_w1e = max(first_stint_min, c1h - 3), min(total_laps - 8, c1h + 3)
             h_w2s, h_w2e = None, None
         elif stop_mode_h == 2:
-            c1h = int(0.30 * total_laps - np.clip((deg - 0.07) * 90, -5, 5))
-            c2h = int(0.66 * total_laps - np.clip((deg - 0.07) * 70, -4, 4))
-            h_w1s, h_w1e = max(6, c1h - 3), min(total_laps - 14, c1h + 3)
-            h_w2s, h_w2e = max(18, c2h - 3), min(total_laps - 4, c2h + 3)
+            first_anchor = 0.40 if best_comp == "HARD" else 0.34 if best_comp == "MEDIUM" else 0.24
+            c1h = int(first_anchor * total_laps - np.clip((deg - 0.082) * 70, -3, 3))
+            c1h = int(np.clip(c1h, first_stint_min, total_laps - 16))
+            c2h = int(0.74 * total_laps - np.clip((deg - 0.082) * 55, -3, 3))
+            c2h = int(np.clip(c2h, c1h + second_stint_min, total_laps - 4))
+            h_w1s, h_w1e = max(first_stint_min, c1h - 3), min(total_laps - 16, c1h + 3)
+            h_w2s, h_w2e = max(c1h + second_stint_min, c2h - 3), min(total_laps - 4, c2h + 3)
         else:
-            c1h = int(0.22 * total_laps)
-            c2h = int(0.48 * total_laps)
-            h_w1s, h_w1e = max(5, c1h - 2), min(total_laps - 20, c1h + 2)
-            h_w2s, h_w2e = max(14, c2h - 2), min(total_laps - 8, c2h + 2)
+            c1h = int(max(first_stint_min, round(0.24 * total_laps)))
+            c2h = int(max(c1h + 12, round(0.52 * total_laps)))
+            h_w1s, h_w1e = max(first_stint_min, c1h - 2), min(total_laps - 20, c1h + 2)
+            h_w2s, h_w2e = max(c1h + 12, c2h - 2), min(total_laps - 8, c2h + 2)
 
         ml_row = ml_by_team.get(team, {})
         ml_exp_raw = ml_row.get("ml_expected_stops")
@@ -736,12 +751,12 @@ def build_strategy_overview(
         ml_p1 = None if ml_p1_raw is None or (isinstance(ml_p1_raw, float) and pd.isna(ml_p1_raw)) else int(round(float(ml_p1_raw)))
         ml_p2 = None if ml_p2_raw is None or (isinstance(ml_p2_raw, float) and pd.isna(ml_p2_raw)) else int(round(float(ml_p2_raw)))
         if ml_p1 is not None:
-            ml_p1 = int(np.clip(ml_p1, 6, total_laps - 6))
+            ml_p1 = int(np.clip(ml_p1, first_stint_min, total_laps - 6))
         if ml_p2 is not None:
-            ml_p2 = int(np.clip(ml_p2, 14, total_laps - 4))
+            ml_p2 = int(np.clip(ml_p2, first_stint_min + second_stint_min, total_laps - 4))
 
         if h_w1s is not None and h_w1e is not None and ml_p1 is not None:
-            ml_w1s = max(6, ml_p1 - 3)
+            ml_w1s = max(first_stint_min, ml_p1 - 3)
             ml_w1e = min(total_laps - 6, ml_p1 + 3)
             w1s = int(round((1.0 - ml_weight) * h_w1s + ml_weight * ml_w1s))
             w1e = int(round((1.0 - ml_weight) * h_w1e + ml_weight * ml_w1e))
@@ -750,15 +765,15 @@ def build_strategy_overview(
 
         if stop_mode >= 2:
             if h_w2s is not None and h_w2e is not None and ml_p2 is not None:
-                ml_w2s = max(14, ml_p2 - 3)
+                ml_w2s = max(first_stint_min + second_stint_min, ml_p2 - 3)
                 ml_w2e = min(total_laps - 4, ml_p2 + 3)
                 w2s = int(round((1.0 - ml_weight) * h_w2s + ml_weight * ml_w2s))
                 w2e = int(round((1.0 - ml_weight) * h_w2e + ml_weight * ml_w2e))
             else:
                 w2s, w2e = h_w2s, h_w2e
             if w2s is None or w2e is None:
-                pivot = int(0.66 * total_laps)
-                w2s, w2e = max(18, pivot - 3), min(total_laps - 4, pivot + 3)
+                pivot = int(0.74 * total_laps)
+                w2s, w2e = max(first_stint_min + second_stint_min, pivot - 3), min(total_laps - 4, pivot + 3)
         else:
             w2s, w2e = None, None
 
@@ -939,12 +954,12 @@ def build_strategy_overview(
         team_outlook_rows = []
 
     deg_mean = float(np.nanmean([r["deg_s_per_lap"] for r in team_rows])) if team_rows else 0.07
-    one_c = int(0.48 * total_laps - np.clip((deg_mean - 0.06) * 120, -5, 5))
-    two_c1 = int(0.30 * total_laps - np.clip((deg_mean - 0.07) * 90, -4, 4))
-    two_c2 = int(0.66 * total_laps - np.clip((deg_mean - 0.07) * 70, -3, 3))
+    one_c = int(0.53 * total_laps - np.clip((deg_mean - 0.072) * 95, -4, 4))
+    two_c1 = int(0.35 * total_laps - np.clip((deg_mean - 0.082) * 70, -3, 3))
+    two_c2 = int(0.74 * total_laps - np.clip((deg_mean - 0.082) * 55, -3, 3))
     pit_window_reference = [
-        {"plan": "One-stop reference", "window_1": f"L{max(8, one_c-3)}-L{min(total_laps-8, one_c+3)}", "window_2": ""},
-        {"plan": "Two-stop reference", "window_1": f"L{max(6, two_c1-3)}-L{min(total_laps-14, two_c1+3)}", "window_2": f"L{max(18, two_c2-3)}-L{min(total_laps-4, two_c2+3)}"},
+        {"plan": "One-stop reference", "window_1": f"L{max(18, one_c-3)}-L{min(total_laps-8, one_c+3)}", "window_2": ""},
+        {"plan": "Two-stop reference", "window_1": f"L{max(14, two_c1-3)}-L{min(total_laps-16, two_c1+3)}", "window_2": f"L{max(28, two_c2-3)}-L{min(total_laps-4, two_c2+3)}"},
     ]
 
     return StrategyOverview(
