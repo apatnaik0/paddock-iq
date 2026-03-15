@@ -166,6 +166,9 @@
 
     <nav class="top-tabs">
       <button class="tab-btn active" data-group="main" data-target="practice-panel">Practice</button>
+      {% if sprint_sessions and sprint_sessions|length > 0 %}
+      <button class="tab-btn" data-group="main" data-target="sprint-panel">Sprint</button>
+      {% endif %}
       <button class="tab-btn" data-group="main" data-target="qualifying-panel">Qualifying</button>
       <button class="tab-btn" data-group="main" data-target="race-panel">Race</button>
     </nav>
@@ -209,6 +212,74 @@
       </div>
       {% endfor %}
     </section>
+
+    {% if sprint_sessions and sprint_sessions|length > 0 %}
+    <section id="sprint-panel" class="tab-panel">
+      <nav class="sub-tabs">
+        {% for s in sprint_sessions %}
+        <button class="tab-btn {% if loop.first %}active{% endif %}" data-group="sprint" data-target="sprint-{{ s.session_name|lower|replace(' ', '-') }}">{{ s.session_name }}</button>
+        {% endfor %}
+      </nav>
+      {% for s in sprint_sessions %}
+      <div id="sprint-{{ s.session_name|lower|replace(' ', '-') }}" class="tab-panel {% if loop.first %}active{% endif %}">
+        <article class="session">
+          <h2>{{ s.session_name }}</h2>
+          <div class="meta"><span>Drivers: {{ s.drivers }}</span><span>Laps: {{ s.laps }}</span></div>
+          <div class="imggrid">
+            {% for chart in s.charts %}
+            <article class="chart">
+              <h3>{{ chart.title }}</h3>
+              <img class="{% if chart.title == 'Fastest Two Lap Delta' %}telemetry-large{% endif %}" src="assets/{{ chart.file }}?v={{ asset_version }}" alt="{{ s.session_name }} {{ chart.title }}" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  {% for point in chart.insights %}
+                  <li>{{ point }}</li>
+                  {% endfor %}
+                </ul>
+              </div>
+            </article>
+            {% endfor %}
+          </div>
+          {% if s.table_kind == "qualifying" %}
+          <table>
+            <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>S1 (s)</th><th>S2 (s)</th><th>S3 (s)</th><th>Best Lap (s)</th></tr></thead>
+            <tbody>
+              {% for r in s.table_rows %}
+              <tr>
+                <td>{{ r.session_position }}</td>
+                <td>{{ r.Driver }}</td>
+                <td>{{ r.Team }}</td>
+                <td>{{ r.s1_time_fmt }}</td>
+                <td>{{ r.s2_time_fmt }}</td>
+                <td>{{ r.s3_time_fmt }}</td>
+                <td>{{ r.best_lap_time_fmt }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% else %}
+          <table>
+            <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>Median Pace (s)</th><th>Fastest Lap (s)</th><th>Stints</th></tr></thead>
+            <tbody>
+              {% for r in s.table_rows %}
+              <tr>
+                <td>{{ r.race_position|int }}</td>
+                <td>{{ r.Driver }}</td>
+                <td>{{ r.Team }}</td>
+                <td>{{ r.median_pace_fmt }}</td>
+                <td>{{ r.fastest_lap_fmt }}</td>
+                <td>{{ r.stints if r.stints is not none else "" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% endif %}
+        </article>
+      </div>
+      {% endfor %}
+    </section>
+    {% endif %}
 
     <section id="qualifying-panel" class="tab-panel">
       <nav class="sub-tabs">
@@ -359,6 +430,10 @@
         tabTracker.switch('session', activeButtonLabel('practice') || 'Practice');
         return;
       }
+      if (mainTarget === 'sprint-panel') {
+        tabTracker.switch('session', activeButtonLabel('sprint') || 'Sprint');
+        return;
+      }
       if (mainTarget === 'qualifying-panel') {
         tabTracker.switch('session', activeButtonLabel('qualifying') || 'Qualifying');
         return;
@@ -373,10 +448,8 @@
       button.classList.add('active');
 
       if (group === 'main') {
-        ['practice-panel', 'qualifying-panel', 'race-panel'].forEach((id) => {
-          const el = document.getElementById(id);
-          if (!el) return;
-          el.classList.toggle('active', id === target);
+        document.querySelectorAll('.tab-panel[id$="-panel"]').forEach((el) => {
+          el.classList.toggle('active', el.id === target);
         });
         tabTracker.switch('main', button.textContent.trim());
         trackActiveSessionFromMain(target);

@@ -7,7 +7,7 @@ import pandas as pd
 from fastf1 import plotting
 from fastf1.exceptions import DataNotLoadedError
 
-from .settings import PATHS, SESSION_ORDER
+from .settings import PATHS, SPRINT_SESSION_ORDER, STANDARD_SESSION_ORDER
 from .utils import ensure_dirs
 
 
@@ -16,6 +16,7 @@ class SessionBundle:
     season: int
     round_number: int
     event_name: str
+    event_format: str
     sessions: dict[str, object]
 
 
@@ -24,15 +25,50 @@ def init_fastf1_cache() -> None:
     fastf1.Cache.enable_cache(str(PATHS.cache))
 
 
+def _canonical_session_name(label: str) -> str | None:
+    mapping = {
+        "Practice 1": "FP1",
+        "Practice 2": "FP2",
+        "Practice 3": "FP3",
+        "Sprint Qualifying": "Sprint Qualifying",
+        "Sprint Shootout": "Sprint Qualifying",
+        "Sprint": "Sprint",
+        "Qualifying": "Qualifying",
+        "Race": "Race",
+    }
+    return mapping.get(str(label).strip())
+
+
+def _session_order_for_event(season: int, round_number: int) -> tuple[str, str, list[str]]:
+    try:
+        event = fastf1.get_event(season, round_number)
+        event_name = str(event.get("EventName", "")).strip()
+        event_format = str(event.get("EventFormat", "")).strip().lower()
+        session_names: list[str] = []
+        for idx in range(1, 6):
+            raw = event.get(f"Session{idx}")
+            if raw is None:
+                continue
+            canonical = _canonical_session_name(str(raw))
+            if canonical:
+                session_names.append(canonical)
+        if session_names:
+            return event_name, event_format, session_names
+        fallback = SPRINT_SESSION_ORDER if "sprint" in event_format else STANDARD_SESSION_ORDER
+        return event_name, event_format, list(fallback)
+    except Exception:
+        return "", "", list(STANDARD_SESSION_ORDER)
+
+
 def load_sessions(
     season: int, round_number: int, telemetry_sessions: set[str] | None = None
 ) -> SessionBundle:
     init_fastf1_cache()
     sessions: dict[str, object] = {}
-    event_name = ""
+    event_name, event_format, session_order = _session_order_for_event(season, round_number)
     telemetry_sessions = telemetry_sessions or set()
 
-    for session_name in SESSION_ORDER:
+    for session_name in session_order:
         try:
             sess = fastf1.get_session(season, round_number, session_name)
             sess.load(
@@ -54,6 +90,7 @@ def load_sessions(
         season=season,
         round_number=round_number,
         event_name=event_name,
+        event_format=event_format,
         sessions=sessions,
     )
 

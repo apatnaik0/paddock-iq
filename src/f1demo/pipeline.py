@@ -310,7 +310,7 @@ def _team_colors_for_laps(session_obj: object, laps: pd.DataFrame) -> dict[str, 
     return team_color_map(session_obj, teams)
 
 
-def _previous_five_rounds(season: int) -> tuple[int, ...]:
+def _previous_five_rounds(season: int, current_round: int) -> tuple[int, ...]:
     try:
         sched = fastf1.get_event_schedule(season, include_testing=False)
         if sched is None or sched.empty or "RoundNumber" not in sched.columns:
@@ -321,7 +321,7 @@ def _previous_five_rounds(season: int) -> tuple[int, ...]:
             .astype(int)
             .tolist()
         )
-        rounds = sorted(set(r for r in rounds if r > 0))
+        rounds = sorted(set(r for r in rounds if 0 < r < int(current_round)))
         if not rounds:
             return tuple()
         return tuple(rounds[-5:])
@@ -518,8 +518,9 @@ def run_pipeline(
     for old in round_plot_dir.glob("*.png"):
         old.unlink()
 
-    bundle = load_sessions(season, round_number, telemetry_sessions={"Qualifying"})
+    bundle = load_sessions(season, round_number, telemetry_sessions={"Qualifying", "Sprint Qualifying"})
     practice_payload: list[dict] = []
+    sprint_payload: list[dict] = []
     quali_payload: list[dict] = []
     race_payload: dict | None = None
 
@@ -604,18 +605,21 @@ def run_pipeline(
             )
             continue
 
-        if session_name == "Qualifying":
+        if session_name in {"Qualifying", "Sprint Qualifying"}:
             q_colors = _colors_for_laps(sess, laps_dataframe(sess, session_name))
             q_team_colors = _team_colors_for_laps(sess, laps_dataframe(sess, session_name))
             q_parts = qualifying_parts_dataframes(sess)
-            for label in ["Q1", "Q2", "Q3"]:
+            split_prefix = "SQ" if session_name == "Sprint Qualifying" else "Q"
+            target_payload = sprint_payload if session_name == "Sprint Qualifying" else quali_payload
+            for idx, label in enumerate(["Q1", "Q2", "Q3"], start=1):
                 laps = q_parts.get(label)
                 if laps is None or laps.empty:
                     continue
+                display_label = f"{split_prefix}{idx}"
                 summary = session_summary(laps)
                 teammate = teammate_delta(summary)
                 stints = stint_summary(laps)
-                export_session_tables(round_table_dir, label, summary, teammate, stints)
+                export_session_tables(round_table_dir, display_label, summary, teammate, stints)
                 # Qualifying session order by best lap in this split.
                 q_order = (
                     summary[["Driver", "Team", "best_lap_s", "median_lap_s", "laps"]]
@@ -647,28 +651,91 @@ def run_pipeline(
                     row["best_lap_time_fmt"] = _format_laptime(row.get("best_lap_time_s"))
                 charts = build_session_charts(
                     round_plot_dir,
-                    label,
+                    display_label,
                     laps,
                     stints,
                     driver_colors=q_colors,
                     team_colors=q_team_colors,
                 )
                 telem_chart = plot_quali_fastest_two_lap_delta(
-                    round_plot_dir, label, sess, label, q_colors
+                    round_plot_dir, display_label, sess, label, q_colors
                 )
                 if telem_chart:
                     charts.append(telem_chart)
                 for c in charts:
-                    c["insights"] = c.get("insights") or _chart_highlights(c["title"], label, table_rows, int(laps.shape[0]))
-                quali_payload.append(
+                    c["insights"] = c.get("insights") or _chart_highlights(c["title"], display_label, table_rows, int(laps.shape[0]))
+                target_payload.append(
                     {
-                        "session_name": label,
+                        "session_name": display_label,
+                        "table_kind": "qualifying",
                         "drivers": int(summary.shape[0]),
                         "laps": int(laps.shape[0]),
                         "table_rows": table_rows,
                         "charts": charts,
                     }
                 )
+            continue
+
+        if session_name == "Sprint":
+            laps = laps_dataframe(sess, session_name)
+            if laps.empty:
+                print("[INFO] Skipping Sprint analysis: sprint lap data not available yet.")
+                continue
+            colors = _colors_for_laps(sess, laps)
+            summary = session_summary(laps)
+            teammate = teammate_delta(summary)
+            stints = stint_summary(laps)
+            export_session_tables(round_table_dir, session_name, summary, teammate, stints)
+            sprint_results = results_dataframe(sess, session_name)
+            if sprint_results.empty or not {"Driver", "Team", "Position"}.issubset(set(sprint_results.columns)):
+                print("[INFO] Sprint results not available yet; sprint tables/charts will remain empty.")
+                continue
+            stint_counts = (
+                stints[stints["lap_count"] >= 2]
+                .groupby("Driver", as_index=False)["Stint"]
+                .nunique()
+                .rename(columns={"Stint": "stints"})
+            )
+            sprint_table = (
+                sprint_results[["Driver", "Team", "Position"]]
+                .rename(columns={"Position": "race_position"})
+                .merge(
+                    summary[["Driver", "median_lap_s", "best_lap_s"]].rename(
+                        columns={"median_lap_s": "median_pace_s", "best_lap_s": "fastest_lap_s"}
+                    ),
+                    on="Driver",
+                    how="left",
+                )
+                .merge(stint_counts, on="Driver", how="left")
+            )
+            sprint_table["race_position"] = pd.to_numeric(sprint_table["race_position"], errors="coerce")
+            sprint_table["stints"] = pd.to_numeric(sprint_table["stints"], errors="coerce").astype("Int64")
+            sprint_table = sprint_table.dropna(subset=["race_position"]).sort_values("race_position").head(10)
+            sprint_driver_order = sprint_table["Driver"].dropna().astype(str).tolist()
+            table_rows = sprint_table.to_dict(orient="records")
+            for row in table_rows:
+                row["median_pace_fmt"] = _format_laptime(row.get("median_pace_s"))
+                row["fastest_lap_fmt"] = _format_laptime(row.get("fastest_lap_s"))
+            charts = build_session_charts(
+                round_plot_dir,
+                session_name,
+                laps,
+                stints,
+                driver_order=sprint_driver_order,
+                driver_colors=colors,
+            )
+            for c in charts:
+                c["insights"] = c.get("insights") or _chart_highlights(c["title"], session_name, table_rows, int(laps.shape[0]))
+            sprint_payload.append(
+                {
+                    "session_name": session_name,
+                    "table_kind": "race",
+                    "drivers": int(summary.shape[0]),
+                    "laps": int(laps.shape[0]),
+                    "table_rows": table_rows,
+                    "charts": charts,
+                }
+            )
             continue
 
         if session_name == "Race":
@@ -731,11 +798,14 @@ def run_pipeline(
 
     # ML component
     train_season = max(2018, season - 1)
+    model_prior_season = season if int(round_number) > 1 else train_season
+    model_prior_rounds = _previous_five_rounds(season, round_number) if int(round_number) > 1 else None
     train_round_end_eff = train_round_end if quick else max(train_round_end, 24)
     target_df = _round_feature_frame(
         season,
         round_number,
-        prior_season=train_season,
+        prior_season=model_prior_season,
+        prior_rounds=model_prior_rounds,
         bundle=bundle,
     )
     model_out = train_and_predict(target_df, pd.DataFrame())
@@ -784,6 +854,7 @@ def run_pipeline(
         "asset_version": int(time.time()),
         "ga4_measurement_id": ga4_measurement_id.strip(),
         "practice_sessions": practice_payload,
+        "sprint_sessions": sprint_payload,
         "qualifying_sessions": quali_payload,
         "race_session": race_payload,
         "quali_predictions": model_out.quali_predictions.to_dict(orient="records"),

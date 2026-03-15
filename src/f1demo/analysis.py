@@ -142,9 +142,9 @@ def _add_tyre_age(df: pd.DataFrame) -> pd.DataFrame:
 
 def _session_group(session_name: str) -> str:
     low = session_name.lower()
-    if "race" in low:
+    if "race" in low or low == "sprint":
         return "race"
-    if "qual" in low or low in {"q1", "q2", "q3"}:
+    if "qual" in low or low in {"q1", "q2", "q3", "sq1", "sq2", "sq3"}:
         return "qualifying"
     return "practice"
 
@@ -923,9 +923,34 @@ def plot_quali_fastest_two_lap_delta(
     try:
         lap_ref = split.pick_drivers(drv_ref).pick_fastest()
         lap_cmp = split.pick_drivers(drv_cmp).pick_fastest()
-        delta, ref_tel, cmp_tel = fastf1.utils.delta_time(lap_ref, lap_cmp)
+        ref_tel = lap_ref.get_car_data().add_distance().copy()
+        cmp_tel = lap_cmp.get_car_data().add_distance().copy()
     except Exception:
         return None
+
+    for tel in (ref_tel, cmp_tel):
+        if "Distance" not in tel.columns or "Time" not in tel.columns:
+            return None
+        tel["Distance"] = pd.to_numeric(tel["Distance"], errors="coerce")
+        tel = tel.dropna(subset=["Distance", "Time"])
+
+    ref_tel = ref_tel.dropna(subset=["Distance", "Time"]).copy()
+    cmp_tel = cmp_tel.dropna(subset=["Distance", "Time"]).copy()
+    if ref_tel.empty or cmp_tel.empty:
+        return None
+
+    ref_tel["time_s"] = ref_tel["Time"].dt.total_seconds()
+    cmp_tel["time_s"] = cmp_tel["Time"].dt.total_seconds()
+    ref_tel = ref_tel.sort_values("Distance").drop_duplicates(subset=["Distance"], keep="last")
+    cmp_tel = cmp_tel.sort_values("Distance").drop_duplicates(subset=["Distance"], keep="last")
+    max_dist = float(min(ref_tel["Distance"].max(), cmp_tel["Distance"].max()))
+    min_dist = float(max(ref_tel["Distance"].min(), cmp_tel["Distance"].min()))
+    if not np.isfinite(max_dist) or not np.isfinite(min_dist) or max_dist <= min_dist:
+        return None
+    distance_grid = np.linspace(min_dist, max_dist, 900)
+    ref_time_interp = np.interp(distance_grid, ref_tel["Distance"].to_numpy(), ref_tel["time_s"].to_numpy())
+    cmp_time_interp = np.interp(distance_grid, cmp_tel["Distance"].to_numpy(), cmp_tel["time_s"].to_numpy())
+    delta_fast_minus_slow_ms = (ref_time_interp - cmp_time_interp) * 1000.0
 
     c_ref = (driver_colors or {}).get(drv_ref, "#4ea1ff")
     c_cmp = (driver_colors or {}).get(drv_cmp, "#00c2a8")
@@ -981,8 +1006,7 @@ def plot_quali_fastest_two_lap_delta(
     except Exception:
         corners = None
 
-    delta_fast_minus_slow_ms = (-delta) * 1000.0
-    ax_delta.plot(ref_tel["Distance"], delta_fast_minus_slow_ms, color="#f4f7fb", linewidth=1.8)
+    ax_delta.plot(distance_grid, delta_fast_minus_slow_ms, color="#f4f7fb", linewidth=1.8)
     ax_delta.axhline(0.0, color="#9fb0c9", linewidth=1.0, linestyle="--")
     ax_delta.set_xlabel("Distance (m)")
     ax_delta.set_ylabel(f"{drv_ref} - {drv_cmp} (ms)")

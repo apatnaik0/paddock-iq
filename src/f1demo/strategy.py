@@ -61,14 +61,26 @@ def _add_tyre_age(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def _scheduled_race_laps(bundle: object) -> int | None:
+    event_name = str(getattr(bundle, "event_name", "") or "").strip().lower()
+    if not event_name:
+        return None
+    lap_map = {
+        "australian grand prix": 58,
+        "chinese grand prix": 56,
+    }
+    return lap_map.get(event_name)
+
+
 def _race_lap_count(bundle: object) -> int:
     race = bundle.sessions.get("Race")
+    fallback = _scheduled_race_laps(bundle) or 58
     if race is None:
-        return 58
+        return fallback
     race_laps = laps_dataframe(race, "Race")
     if race_laps.empty or "LapNumber" not in race_laps.columns:
-        return 58
-    return int(pd.to_numeric(race_laps["LapNumber"], errors="coerce").max() or 58)
+        return fallback
+    return int(pd.to_numeric(race_laps["LapNumber"], errors="coerce").max() or fallback)
 
 
 def _practice_pool(bundle: object) -> pd.DataFrame:

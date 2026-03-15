@@ -1,21 +1,21 @@
 [
   {
+    "slug": "2026_round_02",
+    "season": 2026,
+    "round_number": 2,
+    "event_name": "Chinese Grand Prix",
+    "overview_path": "races/2026_round_02/index.html",
+    "updated_at_utc": "2026-03-15T03:07:57+00:00",
+    "is_current": true,
+    "status": "upcoming"
+  },
+  {
     "slug": "2026_round_01",
     "season": 2026,
     "round_number": 1,
     "event_name": "Australian Grand Prix",
     "overview_path": "races/2026_round_01/index.html",
     "updated_at_utc": "2026-03-08T14:13:45+00:00",
-    "is_current": true,
-    "status": "upcoming"
-  },
-  {
-    "slug": "2025_round_01",
-    "season": 2025,
-    "round_number": 1,
-    "event_name": "Australian Grand Prix",
-    "overview_path": "races/2025_round_01/index.html",
-    "updated_at_utc": "2026-03-04T02:10:53+00:00",
     "is_current": false,
     "status": "completed"
   }

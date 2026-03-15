@@ -30,4 +30,5 @@ PATHS = Paths(
     templates=ROOT / "templates",
 )
 
-SESSION_ORDER = ["FP1", "FP2", "FP3", "Qualifying", "Race"]
+STANDARD_SESSION_ORDER = ["FP1", "FP2", "FP3", "Qualifying", "Race"]
+SPRINT_SESSION_ORDER = ["FP1", "Sprint Qualifying", "Sprint", "Qualifying", "Race"]
