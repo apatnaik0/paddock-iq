@@ -1,13 +1,23 @@
 [
   {
+    "slug": "2026_round_03",
+    "season": 2026,
+    "round_number": 3,
+    "event_name": "Japanese Grand Prix",
+    "overview_path": "races/2026_round_03/index.html",
+    "updated_at_utc": "2026-03-30T14:23:29+00:00",
+    "is_current": false,
+    "status": "completed"
+  },
+  {
     "slug": "2026_round_02",
     "season": 2026,
     "round_number": 2,
     "event_name": "Chinese Grand Prix",
     "overview_path": "races/2026_round_02/index.html",
     "updated_at_utc": "2026-03-15T17:57:17+00:00",
-    "is_current": true,
-    "status": "upcoming"
+    "is_current": false,
+    "status": "completed"
   },
   {
     "slug": "2026_round_01",

@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaddockIQ | Japanese Grand Prix</title>
+  <style>
+    :root {
+      --bg: #090c11;
+      --panel: #121720;
+      --panel-2: #171f2b;
+      --ink: #edf3ff;
+      --muted: #9db0cc;
+      --line: #2b3647;
+      --accent: #4ea1ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 19px;
+      line-height: 1.45;
+      background: radial-gradient(circle at 15% 5%, #121b2a 0%, var(--bg) 48%, #07090d 100%);
+      color: var(--ink);
+    }
+    .wrap { max-width: 1420px; margin: 0 auto; padding: 22px 16px 52px; }
+    .head {
+      background: linear-gradient(145deg, #141b28 0%, #0f141d 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .brand { margin: 0; color: #e9f2ff; font-size: 1.06rem; font-weight: 800; letter-spacing: 0.3px; }
+    .topnav { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .navbtn {
+      text-decoration: none;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 8px 14px;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: #071222;
+    }
+    .navbtn.inactive {
+      color: #dfe8f7;
+      background: #111a28;
+      border-color: #31405a;
+    }
+    h1 { margin: 0 0 6px; font-size: 2rem; letter-spacing: 0.2px; }
+    .muted { color: var(--muted); margin: 0; font-size: 1.08rem; }
+
+    .top-tabs, .sub-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .tab-btn {
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--ink);
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1.12rem;
+    }
+    .tab-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #071222;
+    }
+
+    .tab-panel { display: none; margin-top: 8px; }
+    .tab-panel.active { display: block; }
+
+    .session {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .session h2 { margin: 0 0 6px; font-size: 1.32rem; }
+    .meta { display: flex; gap: 12px; flex-wrap: wrap; color: var(--muted); font-size: 1.08rem; }
+
+    .imggrid {
+      display: block;
+      margin-top: 6px;
+    }
+    .chart {
+      background: #0f141d;
+      border: 1px solid #273246;
+      border-radius: 10px;
+      padding: 6px;
+      margin-bottom: 6px;
+    }
+    .chart h3 { margin: 0 0 8px; font-size: 1.14rem; color: #dce8f9; }
+    img {
+      width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      border-radius: 6px;
+      border: 1px solid #2a3447;
+      background: #0b0f16;
+    }
+    img.telemetry-large {
+      max-height: 900px;
+    }
+
+    .insight-box {
+      margin-top: 8px;
+      border: 1px solid #243245;
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: #0f141d;
+    }
+    .insight-title {
+      color: #c4d3ea;
+      font-size: 1.12rem;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+    .insight-box ul {
+      margin: 0;
+      padding-left: 16px;
+      color: #d7e3f6;
+      font-size: 1.08rem;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 1.1rem; }
+    th, td { text-align: left; border-bottom: 1px solid #223042; padding: 7px 4px; }
+    th { color: #bfd1ea; font-weight: 600; }
+    td { color: #dfe8f7; }
+
+    .empty {
+      border: 1px dashed #33435b;
+      border-radius: 10px;
+      padding: 10px;
+      color: var(--muted);
+      margin-top: 8px;
+      background: #0f141d;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="head">
+      <p class="brand">PaddockIQ</p>
+      <h1>Weekend Analysis</h1>
+      <p class="muted">2026 Round 3 | Japanese Grand Prix</p>
+      <nav class="topnav">
+        <a class="navbtn inactive" href="../../index.html">Race Hub</a>
+        <a class="navbtn inactive" href="index.html">Overview</a>
+        <a class="navbtn" href="round.html">Weekend Analysis</a>
+        <a class="navbtn inactive" href="strategy.html">Strategy Lab</a>
+      </nav>
+    </section>
+
+    <nav class="top-tabs">
+      <button class="tab-btn active" data-group="main" data-target="practice-panel">Practice</button>
+      
+      <button class="tab-btn" data-group="main" data-target="qualifying-panel">Qualifying</button>
+      <button class="tab-btn" data-group="main" data-target="race-panel">Race</button>
+    </nav>
+
+    <section id="practice-panel" class="tab-panel active">
+      <nav class="sub-tabs">
+        
+        <button class="tab-btn active" data-group="practice" data-target="practice-fp1">FP1</button>
+        
+        <button class="tab-btn " data-group="practice" data-target="practice-fp2">FP2</button>
+        
+        <button class="tab-btn " data-group="practice" data-target="practice-fp3">FP3</button>
+        
+      </nav>
+      
+      <div id="practice-fp1" class="tab-panel active">
+        <article class="session">
+          <h2>FP1</h2>
+          <div class="meta"><span>Drivers: 22</span><span>Laps: 428</span></div>
+          <div class="imggrid">
+            
+            <article class="chart">
+              <h3>Pace Distribution</h3>
+              <img class="" src="assets/fp1_pace_box.png?v=1774880609" alt="FP1 Pace Distribution" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP1 includes 428 cleaned timed laps, with RUS (Mercedes) setting the top reference at 1:32.041.</li>
+                  
+                  <li>The order fans from +1.031s at P5 to +1.356s at P10; this shape is typical when teams split between short-run prep and long-run programs.</li>
+                  
+                  <li>Practice interpretation: wide boxes are often run-plan noise (fuel, traffic, prep laps), while narrow boxes with decent pace usually indicate a stable baseline rather than peak mode.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Median Pace Delta to Fastest</h3>
+              <img class="" src="assets/fp1_median_delta.png?v=1774880609" alt="FP1 Median Pace Delta to Fastest" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Median pace baseline is RUS (Mercedes) at 1:32.041, with immediate challengers at +0.397s and +0.652s.</li>
+                  
+                  <li>Delta growth to +1.031s (P5) and +1.356s (P10) suggests at least two pace tiers, but practice tiers can compress once fuel loads converge.</li>
+                  
+                  <li>Potential hidden-pace context: teams may suppress headline pace via higher fuel or conservative power modes, so prioritize repeatability and stint behavior over absolute median delta alone.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Delta Heatmap</h3>
+              <img class="" src="assets/fp1_sector_heatmap.png?v=1774880609" alt="FP1 Sector Delta Heatmap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP1 sector map is anchored to RUS (Mercedes) at 1:32.041, with the first chase gap at +0.397s.</li>
+                  
+                  <li>The spread expands from +0.652s at P3 to +1.356s at P10, which usually indicates multiple run plans (fuel/compound targets) rather than one pure quali simulation.</li>
+                  
+                  <li>Large single-sector losses in practice can come from conservative deployment and heavier fuel, so treat red cells as directionally useful, not absolute qualifying truth.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Pace vs Consistency</h3>
+              <img class="" src="assets/fp1_consistency.png?v=1774880609" alt="FP1 Pace vs Consistency" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>RUS (Mercedes) is the pace anchor at 1:32.041 over 21 laps, while PIA and NOR sit at +0.397s and +0.652s.</li>
+                  
+                  <li>Drivers low on the chart with larger bubbles are showing repeatable race-run behavior; high vertical spread often points to mixed fuel targets, traffic, or setup experimentation.</li>
+                  
+                  <li>Potential sandbagging signal: if a team shows strong consistency and lap-count depth without headline top pace, they may be running conservative engine modes or heavier fuel.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Long-Run Pace</h3>
+              <img class="" src="assets/fp1_long_run_pace.png?v=1774880609" alt="FP1 Long-Run Pace" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Long-run reference is NOR (McLaren) at 93.965s, with RUS at +1.595s and ANT at +2.413s.</li>
+                  
+                  <li>Each bar uses one representative race-run stint per driver (minimum 3 laps, excluding opening stint laps).</li>
+                  
+                  <li>Within the plotted long-run group, spread is +3.575s to P5 and +3.575s from fastest to slowest.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Compound Usage Mix</h3>
+              <img class="" src="assets/fp1_compound_usage.png?v=1774880609" alt="FP1 Compound Usage Mix" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Highest soft-running share: ANT (72.7%). Highest medium share: VER (86.7%).</li>
+                  
+                  <li>Highest hard-running share: LIN (80.0%), indicating the strongest bias to longer-stint baseline work in this session.</li>
+                  
+                  <li>Most balanced S/M/H split is HAM (50.0% / 0.0% / 50.0%); compound bias can reflect deliberate program masking as much as pure pace.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Team Mean vs Top Speed</h3>
+              <img class="" src="assets/fp1_team_speed_profile.png?v=1774880609" alt="FP1 Team Mean vs Top Speed" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP1 speed profile links team-level mean speed to terminal speed, with the pace reference set by RUS (Mercedes).</li>
+                  
+                  <li>High top-speed but weaker mean-speed points typically indicate lower drag or stronger deployment, while high mean-speed with modest top-speed usually reflects downforce-biased setup.</li>
+                  
+                  <li>Practice caveat: engine mode masking and fuel-load variation can hide true one-lap pace, so use this chart as aero/efficiency direction rather than final ranking.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+          </div>
+          <table>
+            <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>Top-5 Avg Pace</th><th>Laps</th></tr></thead>
+            <tbody>
+              
+              <tr><td>1</td><td>RUS</td><td>Mercedes</td><td>1:32.041</td><td>21</td></tr>
+              
+              <tr><td>2</td><td>PIA</td><td>McLaren</td><td>1:32.438</td><td>20</td></tr>
+              
+              <tr><td>3</td><td>NOR</td><td>McLaren</td><td>1:32.694</td><td>17</td></tr>
+              
+              <tr><td>4</td><td>ANT</td><td>Mercedes</td><td>1:32.726</td><td>21</td></tr>
+              
+              <tr><td>5</td><td>LAW</td><td>Racing Bulls</td><td>1:33.072</td><td>23</td></tr>
+              
+              <tr><td>6</td><td>VER</td><td>Red Bull Racing</td><td>1:33.188</td><td>23</td></tr>
+              
+              <tr><td>7</td><td>HAM</td><td>Ferrari</td><td>1:33.204</td><td>16</td></tr>
+              
+              <tr><td>8</td><td>LEC</td><td>Ferrari</td><td>1:33.327</td><td>21</td></tr>
+              
+              <tr><td>9</td><td>HAD</td><td>Red Bull Racing</td><td>1:33.374</td><td>23</td></tr>
+              
+              <tr><td>10</td><td>LIN</td><td>Racing Bulls</td><td>1:33.397</td><td>25</td></tr>
+              
+            </tbody>
+          </table>
+        </article>
+      </div>
+      
+      <div id="practice-fp2" class="tab-panel ">
+        <article class="session">
+          <h2>FP2</h2>
+          <div class="meta"><span>Drivers: 21</span><span>Laps: 429</span></div>
+          <div class="imggrid">
+            
+            <article class="chart">
+              <h3>Pace Distribution</h3>
+              <img class="" src="assets/fp2_pace_box.png?v=1774880609" alt="FP2 Pace Distribution" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP2 includes 429 cleaned timed laps, with PIA (McLaren) setting the top reference at 1:30.788.</li>
+                  
+                  <li>The order fans from +0.737s at P5 to +1.846s at P10; this shape is typical when teams split between short-run prep and long-run programs.</li>
+                  
+                  <li>Practice interpretation: wide boxes are often run-plan noise (fuel, traffic, prep laps), while narrow boxes with decent pace usually indicate a stable baseline rather than peak mode.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Median Pace Delta to Fastest</h3>
+              <img class="" src="assets/fp2_median_delta.png?v=1774880609" alt="FP2 Median Pace Delta to Fastest" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Median pace baseline is PIA (McLaren) at 1:30.788, with immediate challengers at +0.173s and +0.230s.</li>
+                  
+                  <li>Delta growth to +0.737s (P5) and +1.846s (P10) suggests at least two pace tiers, but practice tiers can compress once fuel loads converge.</li>
+                  
+                  <li>Potential hidden-pace context: teams may suppress headline pace via higher fuel or conservative power modes, so prioritize repeatability and stint behavior over absolute median delta alone.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Delta Heatmap</h3>
+              <img class="" src="assets/fp2_sector_heatmap.png?v=1774880609" alt="FP2 Sector Delta Heatmap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP2 sector map is anchored to PIA (McLaren) at 1:30.788, with the first chase gap at +0.173s.</li>
+                  
+                  <li>The spread expands from +0.230s at P3 to +1.846s at P10, which usually indicates multiple run plans (fuel/compound targets) rather than one pure quali simulation.</li>
+                  
+                  <li>Large single-sector losses in practice can come from conservative deployment and heavier fuel, so treat red cells as directionally useful, not absolute qualifying truth.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Pace vs Consistency</h3>
+              <img class="" src="assets/fp2_consistency.png?v=1774880609" alt="FP2 Pace vs Consistency" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>PIA (McLaren) is the pace anchor at 1:30.788 over 24 laps, while RUS and ANT sit at +0.173s and +0.230s.</li>
+                  
+                  <li>Drivers low on the chart with larger bubbles are showing repeatable race-run behavior; high vertical spread often points to mixed fuel targets, traffic, or setup experimentation.</li>
+                  
+                  <li>Potential sandbagging signal: if a team shows strong consistency and lap-count depth without headline top pace, they may be running conservative engine modes or heavier fuel.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Long-Run Pace</h3>
+              <img class="" src="assets/fp2_long_run_pace.png?v=1774880609" alt="FP2 Long-Run Pace" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Long-run reference is ANT (Mercedes) at 94.557s, with RUS at +0.658s and LEC at +0.724s.</li>
+                  
+                  <li>Each bar uses one representative race-run stint per driver (minimum 3 laps, excluding opening stint laps).</li>
+                  
+                  <li>Within the plotted long-run group, spread is +1.539s to P5 and +2.448s from fastest to slowest.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Compound Usage Mix</h3>
+              <img class="" src="assets/fp2_compound_usage.png?v=1774880609" alt="FP2 Compound Usage Mix" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Highest soft-running share: HUL (35.7%). Highest medium share: OCO (87.5%).</li>
+                  
+                  <li>Highest hard-running share: GAS (86.7%), indicating the strongest bias to longer-stint baseline work in this session.</li>
+                  
+                  <li>Most balanced S/M/H split is HUL (35.7% / 0.0% / 64.3%); compound bias can reflect deliberate program masking as much as pure pace.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Team Mean vs Top Speed</h3>
+              <img class="" src="assets/fp2_team_speed_profile.png?v=1774880609" alt="FP2 Team Mean vs Top Speed" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP2 speed profile links team-level mean speed to terminal speed, with the pace reference set by PIA (McLaren).</li>
+                  
+                  <li>High top-speed but weaker mean-speed points typically indicate lower drag or stronger deployment, while high mean-speed with modest top-speed usually reflects downforce-biased setup.</li>
+                  
+                  <li>Practice caveat: engine mode masking and fuel-load variation can hide true one-lap pace, so use this chart as aero/efficiency direction rather than final ranking.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+          </div>
+          <table>
+            <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>Top-5 Avg Pace</th><th>Laps</th></tr></thead>
+            <tbody>
+              
+              <tr><td>1</td><td>PIA</td><td>McLaren</td><td>1:30.788</td><td>24</td></tr>
+              
+              <tr><td>2</td><td>RUS</td><td>Mercedes</td><td>1:30.961</td><td>22</td></tr>
+              
+              <tr><td>3</td><td>ANT</td><td>Mercedes</td><td>1:31.018</td><td>19</td></tr>
+              
+              <tr><td>4</td><td>HAM</td><td>Ferrari</td><td>1:31.384</td><td>19</td></tr>
+              
+              <tr><td>5</td><td>LEC</td><td>Ferrari</td><td>1:31.525</td><td>23</td></tr>
+              
+              <tr><td>6</td><td>HUL</td><td>Audi</td><td>1:32.123</td><td>22</td></tr>
+              
+              <tr><td>7</td><td>HAD</td><td>Red Bull Racing</td><td>1:32.202</td><td>23</td></tr>
+              
+              <tr><td>8</td><td>LAW</td><td>Racing Bulls</td><td>1:32.233</td><td>24</td></tr>
+              
+              <tr><td>9</td><td>GAS</td><td>Alpine</td><td>1:32.500</td><td>24</td></tr>
+              
+              <tr><td>10</td><td>OCO</td><td>Haas F1 Team</td><td>1:32.634</td><td>24</td></tr>
+              
+            </tbody>
+          </table>
+        </article>
+      </div>
+      
+      <div id="practice-fp3" class="tab-panel ">
+        <article class="session">
+          <h2>FP3</h2>
+          <div class="meta"><span>Drivers: 22</span><span>Laps: 343</span></div>
+          <div class="imggrid">
+            
+            <article class="chart">
+              <h3>Pace Distribution</h3>
+              <img class="" src="assets/fp3_pace_box.png?v=1774880609" alt="FP3 Pace Distribution" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP3 includes 343 cleaned timed laps, with ANT (Mercedes) setting the top reference at 1:29.932.</li>
+                  
+                  <li>The order fans from +0.821s at P5 to +1.588s at P10; this shape is typical when teams split between short-run prep and long-run programs.</li>
+                  
+                  <li>Practice interpretation: wide boxes are often run-plan noise (fuel, traffic, prep laps), while narrow boxes with decent pace usually indicate a stable baseline rather than peak mode.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Median Pace Delta to Fastest</h3>
+              <img class="" src="assets/fp3_median_delta.png?v=1774880609" alt="FP3 Median Pace Delta to Fastest" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Median pace baseline is ANT (Mercedes) at 1:29.932, with immediate challengers at +0.102s and +0.584s.</li>
+                  
+                  <li>Delta growth to +0.821s (P5) and +1.588s (P10) suggests at least two pace tiers, but practice tiers can compress once fuel loads converge.</li>
+                  
+                  <li>Potential hidden-pace context: teams may suppress headline pace via higher fuel or conservative power modes, so prioritize repeatability and stint behavior over absolute median delta alone.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Delta Heatmap</h3>
+              <img class="" src="assets/fp3_sector_heatmap.png?v=1774880609" alt="FP3 Sector Delta Heatmap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP3 sector map is anchored to ANT (Mercedes) at 1:29.932, with the first chase gap at +0.102s.</li>
+                  
+                  <li>The spread expands from +0.584s at P3 to +1.588s at P10, which usually indicates multiple run plans (fuel/compound targets) rather than one pure quali simulation.</li>
+                  
+                  <li>Large single-sector losses in practice can come from conservative deployment and heavier fuel, so treat red cells as directionally useful, not absolute qualifying truth.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Pace vs Consistency</h3>
+              <img class="" src="assets/fp3_consistency.png?v=1774880609" alt="FP3 Pace vs Consistency" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>ANT (Mercedes) is the pace anchor at 1:29.932 over 12 laps, while RUS and LEC sit at +0.102s and +0.584s.</li>
+                  
+                  <li>Drivers low on the chart with larger bubbles are showing repeatable race-run behavior; high vertical spread often points to mixed fuel targets, traffic, or setup experimentation.</li>
+                  
+                  <li>Potential sandbagging signal: if a team shows strong consistency and lap-count depth without headline top pace, they may be running conservative engine modes or heavier fuel.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Compound Usage Mix</h3>
+              <img class="" src="assets/fp3_compound_usage.png?v=1774880609" alt="FP3 Compound Usage Mix" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Highest soft-running share: ANT (100.0%). Highest medium share: LAW (83.3%).</li>
+                  
+                  <li>No hard-compound running is present for the selected drivers in this session; programs are concentrated on soft/medium work.</li>
+                  
+                  <li>Most balanced S/M/H split is GAS (50.0% / 50.0% / 0.0%); compound bias can reflect deliberate program masking as much as pure pace.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Team Mean vs Top Speed</h3>
+              <img class="" src="assets/fp3_team_speed_profile.png?v=1774880609" alt="FP3 Team Mean vs Top Speed" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>FP3 speed profile links team-level mean speed to terminal speed, with the pace reference set by ANT (Mercedes).</li>
+                  
+                  <li>High top-speed but weaker mean-speed points typically indicate lower drag or stronger deployment, while high mean-speed with modest top-speed usually reflects downforce-biased setup.</li>
+                  
+                  <li>Practice caveat: engine mode masking and fuel-load variation can hide true one-lap pace, so use this chart as aero/efficiency direction rather than final ranking.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+          </div>
+          <table>
+            <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>Top-5 Avg Pace</th><th>Laps</th></tr></thead>
+            <tbody>
+              
+              <tr><td>1</td><td>ANT</td><td>Mercedes</td><td>1:29.932</td><td>12</td></tr>
+              
+              <tr><td>2</td><td>RUS</td><td>Mercedes</td><td>1:30.034</td><td>13</td></tr>
+              
+              <tr><td>3</td><td>LEC</td><td>Ferrari</td><td>1:30.516</td><td>16</td></tr>
+              
+              <tr><td>4</td><td>PIA</td><td>McLaren</td><td>1:30.542</td><td>15</td></tr>
+              
+              <tr><td>5</td><td>HAM</td><td>Ferrari</td><td>1:30.752</td><td>17</td></tr>
+              
+              <tr><td>6</td><td>HUL</td><td>Audi</td><td>1:31.102</td><td>17</td></tr>
+              
+              <tr><td>7</td><td>VER</td><td>Red Bull Racing</td><td>1:31.230</td><td>19</td></tr>
+              
+              <tr><td>8</td><td>BOR</td><td>Audi</td><td>1:31.248</td><td>18</td></tr>
+              
+              <tr><td>9</td><td>LAW</td><td>Racing Bulls</td><td>1:31.493</td><td>19</td></tr>
+              
+              <tr><td>10</td><td>GAS</td><td>Alpine</td><td>1:31.519</td><td>16</td></tr>
+              
+            </tbody>
+          </table>
+        </article>
+      </div>
+      
+    </section>
+
+    
+
+    <section id="qualifying-panel" class="tab-panel">
+      <nav class="sub-tabs">
+        
+        <button class="tab-btn active" data-group="qualifying" data-target="qualifying-q1">Q1</button>
+        
+        <button class="tab-btn " data-group="qualifying" data-target="qualifying-q2">Q2</button>
+        
+        <button class="tab-btn " data-group="qualifying" data-target="qualifying-q3">Q3</button>
+        
+      </nav>
+
+      
+
+      
+      <div id="qualifying-q1" class="tab-panel active">
+        <article class="session">
+          <h2>Q1</h2>
+          <div class="meta"><span>Drivers: 22</span><span>Laps: 120</span></div>
+          <div class="imggrid">
+            
+            <article class="chart">
+              <h3>Sector Delta Comparison</h3>
+              <img class="" src="assets/q1_sector_delta_comparison.png?v=1774880609" alt="Q1 Sector Delta Comparison" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>S1/S2/S3 benchmarks are LEC (Ferrari) 32.269s, PIA (McLaren) 39.788s, and HUL (Audi) 17.564s.</li>
+                  
+                  <li>3 different driver(s) hold sector-best times, so lap ranking is shaped by sector balance rather than a single dominant split.</li>
+                  
+                  <li>With a 0.052s table gap from P1 to P2, even one mid-sector correction can materially change grid order.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Best Lap Delta to Fastest</h3>
+              <img class="" src="assets/q1_best_delta.png?v=1774880609" alt="Q1 Best Lap Delta to Fastest" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Best-lap benchmark is LEC (Ferrari) at 1:29.915; closest challenger is RUS at +0.052s.</li>
+                  
+                  <li>This reflects peak single-lap execution potential, so a low delta does not always imply equivalent long-run pace.</li>
+                  
+                  <li>With P1-to-P3 only +0.120s, marginal sector improvements can quickly reshuffle this split.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Delta Heatmap</h3>
+              <img class="" src="assets/q1_sector_heatmap.png?v=1774880609" alt="Q1 Sector Delta Heatmap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>The heatmap is anchored to S1/S2/S3 references of 32.269s, 39.788s, and 17.564s respectively.</li>
+                  
+                  <li>Because 3 driver(s) share sector benchmarks, the chart highlights where contenders trade strengths across the lap.</li>
+                  
+                  <li>S2 has the widest sector spread at +0.539s from best to slowest, making it the key separator in this session.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Improvement Analysis</h3>
+              <img class="" src="assets/q1_improvement.png?v=1774880609" alt="Q1 Improvement Analysis" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>LEC (Ferrari) sets the reference at 1:29.915, while this chart isolates who improved most run-to-run in Q1.</li>
+                  
+                  <li>Large positive improvement with low lap count often signals one optimized push-lap, while repeated medium gains suggest sustainable pace unlocking.</li>
+                  
+                  <li>The current top-table separation is 0.052s, so incremental gains in final attempts can still reorder nearby positions.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Execution Gap</h3>
+              <img class="" src="assets/q1_sector_execution_gap.png?v=1774880609" alt="Q1 Sector Execution Gap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>LEC (Ferrari) leads the split at 1:29.915, and this stack shows where rivals leave lap potential unused versus their own best sectors.</li>
+                  
+                  <li>Sector best references are S1 LEC (32.269s), S2 PIA (39.788s), and S3 HUL (17.564s).</li>
+                  
+                  <li>The tallest color block in each stack marks the biggest execution leak and should be the first setup/driver target.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Fastest Two Lap Delta</h3>
+              <img class="telemetry-large" src="assets/q1_fastest_two_delta.png?v=1774880609" alt="Q1 Fastest Two Lap Delta" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Q1 reference lap is LEC (Ferrari) at 1:29.915, with RUS (Mercedes) next at +0.052s.</li>
+                  
+                  <li>Long same-direction delta segments indicate where one lap held a sustained gain rather than isolated corner-only spikes.</li>
+                  
+                  <li>P1-to-P3 separation is +0.120s, so even small mid-lap gains can materially change the front order in this split.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+          </div>
+          <table>
+            <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>S1 (s)</th><th>S2 (s)</th><th>S3 (s)</th><th>Best Lap (s)</th></tr></thead>
+            <tbody>
+              
+              <tr>
+                <td>1</td>
+                <td>LEC</td>
+                <td>Ferrari</td>
+                <td>0:32.269</td>
+                <td>0:39.857</td>
+                <td>0:17.668</td>
+                <td>1:29.915</td>
+              </tr>
+              
+              <tr>
+                <td>2</td>
+                <td>RUS</td>
+                <td>Mercedes</td>
+                <td>0:32.443</td>
+                <td>0:39.791</td>
+                <td>0:17.733</td>
+                <td>1:29.967</td>
+              </tr>
+              
+              <tr>
+                <td>3</td>
+                <td>ANT</td>
+                <td>Mercedes</td>
+                <td>0:32.388</td>
+                <td>0:39.930</td>
+                <td>0:17.717</td>
+                <td>1:30.035</td>
+              </tr>
+              
+              <tr>
+                <td>4</td>
+                <td>PIA</td>
+                <td>McLaren</td>
+                <td>0:32.546</td>
+                <td>0:39.788</td>
+                <td>0:17.803</td>
+                <td>1:30.200</td>
+              </tr>
+              
+              <tr>
+                <td>5</td>
+                <td>HAM</td>
+                <td>Ferrari</td>
+                <td>0:32.313</td>
+                <td>0:40.206</td>
+                <td>0:17.691</td>
+                <td>1:30.309</td>
+              </tr>
+              
+              <tr>
+                <td>6</td>
+                <td>HUL</td>
+                <td>Audi</td>
+                <td>0:32.486</td>
+                <td>0:40.231</td>
+                <td>0:17.564</td>
+                <td>1:30.358</td>
+              </tr>
+              
+              <tr>
+                <td>7</td>
+                <td>BOR</td>
+                <td>Audi</td>
+                <td>0:32.440</td>
+                <td>0:40.260</td>
+                <td>0:17.586</td>
+                <td>1:30.359</td>
+              </tr>
+              
+              <tr>
+                <td>8</td>
+                <td>NOR</td>
+                <td>McLaren</td>
+                <td>0:32.556</td>
+                <td>0:40.033</td>
+                <td>0:17.728</td>
+                <td>1:30.401</td>
+              </tr>
+              
+              <tr>
+                <td>9</td>
+                <td>VER</td>
+                <td>Red Bull Racing</td>
+                <td>0:32.588</td>
+                <td>0:40.319</td>
+                <td>0:17.565</td>
+                <td>1:30.519</td>
+              </tr>
+              
+              <tr>
+                <td>10</td>
+                <td>GAS</td>
+                <td>Alpine</td>
+                <td>0:32.528</td>
+                <td>0:40.327</td>
+                <td>0:17.709</td>
+                <td>1:30.584</td>
+              </tr>
+              
+            </tbody>
+          </table>
+        </article>
+      </div>
+      
+      <div id="qualifying-q2" class="tab-panel ">
+        <article class="session">
+          <h2>Q2</h2>
+          <div class="meta"><span>Drivers: 16</span><span>Laps: 69</span></div>
+          <div class="imggrid">
+            
+            <article class="chart">
+              <h3>Sector Delta Comparison</h3>
+              <img class="" src="assets/q2_sector_delta_comparison.png?v=1774880609" alt="Q2 Sector Delta Comparison" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>S1/S2/S3 benchmarks are LEC (Ferrari) 31.778s, ANT (Mercedes) 39.398s, and ANT (Mercedes) 17.472s.</li>
+                  
+                  <li>2 different driver(s) hold sector-best times, so lap ranking is shaped by sector balance rather than a single dominant split.</li>
+                  
+                  <li>With a 0.255s table gap from P1 to P2, even one mid-sector correction can materially change grid order.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Best Lap Delta to Fastest</h3>
+              <img class="" src="assets/q2_best_delta.png?v=1774880609" alt="Q2 Best Lap Delta to Fastest" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Best-lap benchmark is ANT (Mercedes) at 1:29.048; closest challenger is LEC at +0.255s.</li>
+                  
+                  <li>This reflects peak single-lap execution potential, so a low delta does not always imply equivalent long-run pace.</li>
+                  
+                  <li>With P1-to-P3 only +0.403s, marginal sector improvements can quickly reshuffle this split.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Delta Heatmap</h3>
+              <img class="" src="assets/q2_sector_heatmap.png?v=1774880609" alt="Q2 Sector Delta Heatmap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>The heatmap is anchored to S1/S2/S3 references of 31.778s, 39.398s, and 17.472s respectively.</li>
+                  
+                  <li>Because 2 driver(s) share sector benchmarks, the chart highlights where contenders trade strengths across the lap.</li>
+                  
+                  <li>S1 has the widest sector spread at +0.787s from best to slowest, making it the key separator in this session.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Improvement Analysis</h3>
+              <img class="" src="assets/q2_improvement.png?v=1774880609" alt="Q2 Improvement Analysis" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>ANT (Mercedes) sets the reference at 1:29.048, while this chart isolates who improved most run-to-run in Q2.</li>
+                  
+                  <li>Large positive improvement with low lap count often signals one optimized push-lap, while repeated medium gains suggest sustainable pace unlocking.</li>
+                  
+                  <li>The current top-table separation is 0.255s, so incremental gains in final attempts can still reorder nearby positions.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Execution Gap</h3>
+              <img class="" src="assets/q2_sector_execution_gap.png?v=1774880609" alt="Q2 Sector Execution Gap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>ANT (Mercedes) leads the split at 1:29.048, and this stack shows where rivals leave lap potential unused versus their own best sectors.</li>
+                  
+                  <li>Sector best references are S1 LEC (31.778s), S2 ANT (39.398s), and S3 ANT (17.472s).</li>
+                  
+                  <li>The tallest color block in each stack marks the biggest execution leak and should be the first setup/driver target.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Fastest Two Lap Delta</h3>
+              <img class="telemetry-large" src="assets/q2_fastest_two_delta.png?v=1774880609" alt="Q2 Fastest Two Lap Delta" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Q2 reference lap is ANT (Mercedes) at 1:29.048, with LEC (Ferrari) next at +0.255s.</li>
+                  
+                  <li>Long same-direction delta segments indicate where one lap held a sustained gain rather than isolated corner-only spikes.</li>
+                  
+                  <li>P1-to-P3 separation is +0.403s, so even small mid-lap gains can materially change the front order in this split.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+          </div>
+          <table>
+            <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>S1 (s)</th><th>S2 (s)</th><th>S3 (s)</th><th>Best Lap (s)</th></tr></thead>
+            <tbody>
+              
+              <tr>
+                <td>1</td>
+                <td>ANT</td>
+                <td>Mercedes</td>
+                <td>0:32.178</td>
+                <td>0:39.398</td>
+                <td>0:17.472</td>
+                <td>1:29.048</td>
+              </tr>
+              
+              <tr>
+                <td>2</td>
+                <td>LEC</td>
+                <td>Ferrari</td>
+                <td>0:31.778</td>
+                <td>0:39.855</td>
+                <td>0:17.670</td>
+                <td>1:29.303</td>
+              </tr>
+              
+              <tr>
+                <td>3</td>
+                <td>PIA</td>
+                <td>McLaren</td>
+                <td>0:32.131</td>
+                <td>0:39.743</td>
+                <td>0:17.577</td>
+                <td>1:29.451</td>
+              </tr>
+              
+              <tr>
+                <td>4</td>
+                <td>HAM</td>
+                <td>Ferrari</td>
+                <td>0:32.031</td>
+                <td>0:39.933</td>
+                <td>0:17.625</td>
+                <td>1:29.589</td>
+              </tr>
+              
+              <tr>
+                <td>5</td>
+                <td>RUS</td>
+                <td>Mercedes</td>
+                <td>0:32.165</td>
+                <td>0:39.715</td>
+                <td>0:17.707</td>
+                <td>1:29.686</td>
+              </tr>
+              
+              <tr>
+                <td>6</td>
+                <td>NOR</td>
+                <td>McLaren</td>
+                <td>0:32.208</td>
+                <td>0:39.892</td>
+                <td>0:17.695</td>
+                <td>1:29.795</td>
+              </tr>
+              
+              <tr>
+                <td>7</td>
+                <td>GAS</td>
+                <td>Alpine</td>
+                <td>0:32.224</td>
+                <td>0:40.114</td>
+                <td>0:17.531</td>
+                <td>1:29.874</td>
+              </tr>
+              
+              <tr>
+                <td>8</td>
+                <td>BOR</td>
+                <td>Audi</td>
+                <td>0:32.288</td>
+                <td>0:40.149</td>
+                <td>0:17.492</td>
+                <td>1:29.990</td>
+              </tr>
+              
+              <tr>
+                <td>9</td>
+                <td>HAD</td>
+                <td>Red Bull Racing</td>
+                <td>0:32.336</td>
+                <td>0:40.094</td>
+                <td>0:17.608</td>
+                <td>1:30.104</td>
+              </tr>
+              
+              <tr>
+                <td>10</td>
+                <td>LIN</td>
+                <td>Racing Bulls</td>
+                <td>0:32.565</td>
+                <td>0:40.043</td>
+                <td>0:17.501</td>
+                <td>1:30.109</td>
+              </tr>
+              
+            </tbody>
+          </table>
+        </article>
+      </div>
+      
+      <div id="qualifying-q3" class="tab-panel ">
+        <article class="session">
+          <h2>Q3</h2>
+          <div class="meta"><span>Drivers: 10</span><span>Laps: 38</span></div>
+          <div class="imggrid">
+            
+            <article class="chart">
+              <h3>Sector Delta Comparison</h3>
+              <img class="" src="assets/q3_sector_delta_comparison.png?v=1774880609" alt="Q3 Sector Delta Comparison" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>S1/S2/S3 benchmarks are LEC (Ferrari) 31.655s, ANT (Mercedes) 39.439s, and ANT (Mercedes) 17.464s.</li>
+                  
+                  <li>2 different driver(s) hold sector-best times, so lap ranking is shaped by sector balance rather than a single dominant split.</li>
+                  
+                  <li>With a 0.298s table gap from P1 to P2, even one mid-sector correction can materially change grid order.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Best Lap Delta to Fastest</h3>
+              <img class="" src="assets/q3_best_delta.png?v=1774880609" alt="Q3 Best Lap Delta to Fastest" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Best-lap benchmark is ANT (Mercedes) at 1:28.778; closest challenger is RUS at +0.298s.</li>
+                  
+                  <li>This reflects peak single-lap execution potential, so a low delta does not always imply equivalent long-run pace.</li>
+                  
+                  <li>With P1-to-P3 only +0.354s, marginal sector improvements can quickly reshuffle this split.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Delta Heatmap</h3>
+              <img class="" src="assets/q3_sector_heatmap.png?v=1774880609" alt="Q3 Sector Delta Heatmap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>The heatmap is anchored to S1/S2/S3 references of 31.655s, 39.439s, and 17.464s respectively.</li>
+                  
+                  <li>Because 2 driver(s) share sector benchmarks, the chart highlights where contenders trade strengths across the lap.</li>
+                  
+                  <li>S1 has the widest sector spread at +0.893s from best to slowest, making it the key separator in this session.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Improvement Analysis</h3>
+              <img class="" src="assets/q3_improvement.png?v=1774880609" alt="Q3 Improvement Analysis" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>ANT (Mercedes) sets the reference at 1:28.778, while this chart isolates who improved most run-to-run in Q3.</li>
+                  
+                  <li>Large positive improvement with low lap count often signals one optimized push-lap, while repeated medium gains suggest sustainable pace unlocking.</li>
+                  
+                  <li>The current top-table separation is 0.298s, so incremental gains in final attempts can still reorder nearby positions.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Sector Execution Gap</h3>
+              <img class="" src="assets/q3_sector_execution_gap.png?v=1774880609" alt="Q3 Sector Execution Gap" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>ANT (Mercedes) leads the split at 1:28.778, and this stack shows where rivals leave lap potential unused versus their own best sectors.</li>
+                  
+                  <li>Sector best references are S1 LEC (31.655s), S2 ANT (39.439s), and S3 ANT (17.464s).</li>
+                  
+                  <li>The tallest color block in each stack marks the biggest execution leak and should be the first setup/driver target.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+            <article class="chart">
+              <h3>Fastest Two Lap Delta</h3>
+              <img class="telemetry-large" src="assets/q3_fastest_two_delta.png?v=1774880609" alt="Q3 Fastest Two Lap Delta" />
+              <div class="insight-box">
+                <p class="insight-title">Highlights</p>
+                <ul>
+                  
+                  <li>Q3 reference lap is ANT (Mercedes) at 1:28.778, with RUS (Mercedes) next at +0.298s.</li>
+                  
+                  <li>Long same-direction delta segments indicate where one lap held a sustained gain rather than isolated corner-only spikes.</li>
+                  
+                  <li>P1-to-P3 separation is +0.354s, so even small mid-lap gains can materially change the front order in this split.</li>
+                  
+                </ul>
+              </div>
+            </article>
+            
+          </div>
+          <table>
+            <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>S1 (s)</th><th>S2 (s)</th><th>S3 (s)</th><th>Best Lap (s)</th></tr></thead>
+            <tbody>
+              
+              <tr>
+                <td>1</td>
+                <td>ANT</td>
+                <td>Mercedes</td>
+                <td>0:31.827</td>
+                <td>0:39.439</td>
+                <td>0:17.464</td>
+                <td>1:28.778</td>
+              </tr>
+              
+              <tr>
+                <td>2</td>
+                <td>RUS</td>
+                <td>Mercedes</td>
+                <td>0:31.782</td>
+                <td>0:39.607</td>
+                <td>0:17.616</td>
+                <td>1:29.076</td>
+              </tr>
+              
+              <tr>
+                <td>3</td>
+                <td>PIA</td>
+                <td>McLaren</td>
+                <td>0:31.954</td>
+                <td>0:39.557</td>
+                <td>0:17.587</td>
+                <td>1:29.132</td>
+              </tr>
+              
+              <tr>
+                <td>4</td>
+                <td>LEC</td>
+                <td>Ferrari</td>
+                <td>0:31.655</td>
+                <td>0:39.883</td>
+                <td>0:17.753</td>
+                <td>1:29.405</td>
+              </tr>
+              
+              <tr>
+                <td>5</td>
+                <td>NOR</td>
+                <td>McLaren</td>
+                <td>0:32.049</td>
+                <td>0:39.716</td>
+                <td>0:17.627</td>
+                <td>1:29.409</td>
+              </tr>
+              
+              <tr>
+                <td>6</td>
+                <td>HAM</td>
+                <td>Ferrari</td>
+                <td>0:31.762</td>
+                <td>0:39.934</td>
+                <td>0:17.637</td>
+                <td>1:29.567</td>
+              </tr>
+              
+              <tr>
+                <td>7</td>
+                <td>GAS</td>
+                <td>Alpine</td>
+                <td>0:32.143</td>
+                <td>0:40.029</td>
+                <td>0:17.519</td>
+                <td>1:29.691</td>
+              </tr>
+              
+              <tr>
+                <td>8</td>
+                <td>HAD</td>
+                <td>Red Bull Racing</td>
+                <td>0:32.164</td>
+                <td>0:40.137</td>
+                <td>0:17.677</td>
+                <td>1:29.978</td>
+              </tr>
+              
+              <tr>
+                <td>9</td>
+                <td>BOR</td>
+                <td>Audi</td>
+                <td>0:32.292</td>
+                <td>0:40.213</td>
+                <td>0:17.664</td>
+                <td>1:30.274</td>
+              </tr>
+              
+              <tr>
+                <td>10</td>
+                <td>LIN</td>
+                <td>Racing Bulls</td>
+                <td>0:32.548</td>
+                <td>0:40.155</td>
+                <td>0:17.616</td>
+                <td>1:30.319</td>
+              </tr>
+              
+            </tbody>
+          </table>
+        </article>
+      </div>
+      
+    </section>
+
+    <section id="race-panel" class="tab-panel">
+      
+      <article class="session">
+        <h2>Race</h2>
+        <div class="meta"><span>Drivers: 22</span><span>Laps: 1086</span></div>
+        <div class="imggrid">
+          
+          <article class="chart">
+            <h3>Position Trace</h3>
+            <img class="" src="assets/race_position_trace.png?v=1774880609" alt="Race Position Trace" />
+            <div class="insight-box">
+              <p class="insight-title">Highlights</p>
+              <ul>
+                
+                <li>Final order reference is ANT, PIA, LEC, and the trace shows how each driver reached that finish rather than only the classified result.</li>
+                
+                <li>Large slope changes typically align with pit phases, traffic release, or neutralization effects.</li>
+                
+                <li>Compare the winner ANT versus nearest finishers (PIA, LEC) to separate strategy timing from raw pace.</li>
+                
+              </ul>
+            </div>
+          </article>
+          
+          <article class="chart">
+            <h3>Lap Time Trace</h3>
+            <img class="" src="assets/race_lap_time_trace.png?v=1774880609" alt="Race Lap Time Trace" />
+            <div class="insight-box">
+              <p class="insight-title">Highlights</p>
+              <ul>
+                
+                <li>ANT (Mercedes) leads at 1:33.798, with PIA at +0.364s, and this trace shows how that gap evolved lap-by-lap.</li>
+                
+                <li>Step-like improvements often mark post-stop clean-air phases, while spikes usually point to traffic or tyre drop-off.</li>
+                
+                <li>P1-to-P3 pace spread is +0.421s, which indicates how much variation contenders could tolerate during pit cycles.</li>
+                
+              </ul>
+            </div>
+          </article>
+          
+          <article class="chart">
+            <h3>Stint Timeline (Compound Coded)</h3>
+            <img class="" src="assets/race_stints_colored.png?v=1774880609" alt="Race Stint Timeline (Compound Coded)" />
+            <div class="insight-box">
+              <p class="insight-title">Highlights</p>
+              <ul>
+                
+                <li>Observed stop profile is 2 stints for all listed runners, and the front reference is ANT with a median pace of 1:33.798.</li>
+                
+                <li>Longer opening or middle segments usually indicate teams protecting track position and stretching tyre life before committing to stop windows.</li>
+                
+                <li>Shorter repeated segments usually reflect aggressive offset attempts or response calls to direct rivals in the same position battle.</li>
+                
+              </ul>
+            </div>
+          </article>
+          
+          <article class="chart">
+            <h3>Tyre Degradation</h3>
+            <img class="" src="assets/race_degradation.png?v=1774880609" alt="Race Tyre Degradation" />
+            <div class="insight-box">
+              <p class="insight-title">Highlights</p>
+              <ul>
+                
+                <li>ANT (Mercedes) is the pace reference at 1:33.798, and the degradation trend tests whether that edge survives tyre-age accumulation.</li>
+                
+                <li>Flatter trend lines indicate stronger stint management, while steeper slopes usually force earlier stops or larger late-stint deficits.</li>
+                
+                <li>Use slope differences between ANT, PIA, and LEC to estimate who can extend windows without a major pace penalty.</li>
+                
+              </ul>
+            </div>
+          </article>
+          
+          <article class="chart">
+            <h3>Degradation-Corrected Pace</h3>
+            <img class="" src="assets/race_corrected_pace.png?v=1774880609" alt="Race Degradation-Corrected Pace" />
+            <div class="insight-box">
+              <p class="insight-title">Highlights</p>
+              <ul>
+                
+                <li>ANT (Mercedes) is the corrected baseline at 1:33.798, with PIA at +0.364s after tyre-age normalization.</li>
+                
+                <li>Drivers whose corrected distributions stay tight and low typically had strong stint control independent of compound age profile.</li>
+                
+                <li>The corrected benchmark gap of 0.364s to P2 indicates whether raw result order is supported by sustainable pace.</li>
+                
+              </ul>
+            </div>
+          </article>
+          
+        </div>
+        <table>
+          <thead><tr><th>Pos</th><th>Driver</th><th>Team</th><th>Median Pace (s)</th><th>Fastest Lap (s)</th><th>Stints</th></tr></thead>
+          <tbody>
+            
+            <tr>
+              <td>1</td>
+              <td>ANT</td>
+              <td>Mercedes</td>
+              <td>1:33.798</td>
+              <td>1:32.432</td>
+              <td>2</td>
+            </tr>
+            
+            <tr>
+              <td>2</td>
+              <td>PIA</td>
+              <td>McLaren</td>
+              <td>1:34.162</td>
+              <td>1:32.996</td>
+              <td>2</td>
+            </tr>
+            
+            <tr>
+              <td>3</td>
+              <td>LEC</td>
+              <td>Ferrari</td>
+              <td>1:34.220</td>
+              <td>1:32.634</td>
+              <td>2</td>
+            </tr>
+            
+            <tr>
+              <td>4</td>
+              <td>RUS</td>
+              <td>Mercedes</td>
+              <td>1:34.617</td>
+              <td>1:32.549</td>
+              <td>2</td>
+            </tr>
+            
+            <tr>
+              <td>5</td>
+              <td>NOR</td>
+              <td>McLaren</td>
+              <td>1:34.513</td>
+              <td>1:33.208</td>
+              <td>2</td>
+            </tr>
+            
+            <tr>
+              <td>6</td>
+              <td>HAM</td>
+              <td>Ferrari</td>
+              <td>1:34.927</td>
+              <td>1:32.777</td>
+              <td>2</td>
+            </tr>
+            
+            <tr>
+              <td>7</td>
+              <td>GAS</td>
+              <td>Alpine</td>
+              <td>1:35.480</td>
+              <td>1:33.691</td>
+              <td>2</td>
+            </tr>
+            
+            <tr>
+              <td>8</td>
+              <td>VER</td>
+              <td>Red Bull Racing</td>
+              <td>1:35.561</td>
+              <td>1:33.552</td>
+              <td>2</td>
+            </tr>
+            
+            <tr>
+              <td>9</td>
+              <td>LAW</td>
+              <td>Racing Bulls</td>
+              <td>1:36.278</td>
+              <td>1:34.230</td>
+              <td>2</td>
+            </tr>
+            
+            <tr>
+              <td>10</td>
+              <td>OCO</td>
+              <td>Haas F1 Team</td>
+              <td>1:35.889</td>
+              <td>1:34.256</td>
+              <td>2</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </article>
+      
+    </section>
+  </div>
+
+  
+  <script>
+    const analyticsEnabled = false;
+    const tabTracker = (() => {
+      const starts = {};
+      function send(group, name, secs) {
+        if (!analyticsEnabled || typeof gtag !== 'function' || secs < 1) return;
+        gtag('event', 'tab_time', {
+          tab_group: group,
+          tab_name: name,
+          time_seconds: Number(secs.toFixed(1)),
+          season: 2026,
+          round: 3,
+          event_name: 'Japanese Grand Prix',
+          page_name: 'Weekend Analysis'
+        });
+      }
+      return {
+        switch(group, name) {
+          const now = Date.now();
+          if (starts[group]) {
+            send(group, starts[group].name, (now - starts[group].ts) / 1000);
+          }
+          starts[group] = { name, ts: now };
+        },
+        flushAll() {
+          const now = Date.now();
+          Object.keys(starts).forEach((group) => {
+            const rec = starts[group];
+            send(group, rec.name, (now - rec.ts) / 1000);
+          });
+        }
+      };
+    })();
+
+    function activeButtonLabel(group) {
+      const btn = document.querySelector(`.tab-btn[data-group="${group}"].active`);
+      return btn ? btn.textContent.trim() : '';
+    }
+
+    function trackActiveSessionFromMain(mainTarget) {
+      if (mainTarget === 'practice-panel') {
+        tabTracker.switch('session', activeButtonLabel('practice') || 'Practice');
+        return;
+      }
+      if (mainTarget === 'sprint-panel') {
+        tabTracker.switch('session', activeButtonLabel('sprint') || 'Sprint');
+        return;
+      }
+      if (mainTarget === 'qualifying-panel') {
+        tabTracker.switch('session', activeButtonLabel('qualifying') || 'Qualifying');
+        return;
+      }
+      tabTracker.switch('session', 'Race');
+    }
+
+    function activateTab(button) {
+      const group = button.dataset.group;
+      const target = button.dataset.target;
+      document.querySelectorAll(`.tab-btn[data-group="${group}"]`).forEach((btn) => btn.classList.remove('active'));
+      button.classList.add('active');
+
+      if (group === 'main') {
+        document.querySelectorAll('.tab-panel[id$="-panel"]').forEach((el) => {
+          el.classList.toggle('active', el.id === target);
+        });
+        tabTracker.switch('main', button.textContent.trim());
+        trackActiveSessionFromMain(target);
+        return;
+      }
+
+      const subgroupButtons = document.querySelectorAll(`.tab-btn[data-group="${group}"]`);
+      subgroupButtons.forEach((b) => {
+        const panelId = b.dataset.target;
+        const panel = document.getElementById(panelId);
+        if (panel) panel.classList.remove('active');
+      });
+      const active = document.getElementById(target);
+      if (active) active.classList.add('active');
+      tabTracker.switch('session', button.textContent.trim());
+    }
+
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => activateTab(btn));
+    });
+
+    tabTracker.switch('page', 'Weekend Analysis');
+    tabTracker.switch('main', activeButtonLabel('main') || 'Practice');
+    trackActiveSessionFromMain('practice-panel');
+
+    window.addEventListener('beforeunload', () => tabTracker.flushAll());
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') tabTracker.flushAll();
+    });
+  </script>
+</body>
+</html>
