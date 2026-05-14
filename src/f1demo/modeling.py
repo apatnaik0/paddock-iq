@@ -34,6 +34,28 @@ def _rank_score(s: pd.Series) -> pd.Series:
     return r.fillna(tail + 1.0)
 
 
+def _weighted_rank_blend(
+    items: list[tuple[pd.Series, pd.Series, float]],
+    fallback: pd.Series | None = None,
+) -> pd.Series:
+    if not items:
+        if fallback is not None:
+            return fallback.copy()
+        return pd.Series(dtype=float)
+    index = items[0][1].index
+    numer = pd.Series(0.0, index=index, dtype=float)
+    denom = pd.Series(0.0, index=index, dtype=float)
+    for raw, ranked, weight in items:
+        raw_num = pd.to_numeric(raw, errors="coerce")
+        mask = raw_num.notna()
+        numer = numer + ranked.where(mask, 0.0) * float(weight)
+        denom = denom + mask.astype(float) * float(weight)
+    out = numer / denom.replace(0.0, np.nan)
+    if fallback is not None:
+        out = out.fillna(fallback)
+    return out
+
+
 def _event_round_numbers(season: int) -> list[int]:
     try:
         sched = fastf1.get_event_schedule(season, include_testing=False)
@@ -422,6 +444,106 @@ def _practice_features(bundle: object) -> pd.DataFrame:
     return drv.merge(team, on="Team", how="left")
 
 
+def _sprint_features(bundle: object) -> pd.DataFrame:
+    base = pd.DataFrame(columns=["Driver", "Team"])
+    sq = bundle.sessions.get("Sprint Qualifying")
+    sp = bundle.sessions.get("Sprint")
+
+    if sq is not None:
+        sq_res = results_dataframe(sq, "Sprint Qualifying")[["Driver", "Team", "Position"]].rename(
+            columns={"Position": "quali_position"}
+        )
+        if not sq_res.empty:
+            sq_res = _fill_missing_quali_positions(sq, sq_res)
+            sq_res = sq_res.rename(columns={"quali_position": "sprint_quali_position"})
+            base = sq_res[["Driver", "Team", "sprint_quali_position"]].copy()
+
+    if sp is None:
+        if "sprint_quali_position" not in base.columns:
+            base["sprint_quali_position"] = np.nan
+        return base
+
+    laps = clean_session_laps(laps_dataframe(sp, "Sprint"), "Sprint")
+    sp_res = results_dataframe(sp, "Sprint")[["Driver", "Team", "Position"]].rename(
+        columns={"Position": "sprint_position"}
+    )
+    if sp_res.empty and laps.empty:
+        if base.empty:
+            base = pd.DataFrame(columns=["Driver", "Team", "sprint_quali_position"])
+        base["sprint_position"] = np.nan
+        base["sprint_median_s"] = np.nan
+        base["sprint_best_s"] = np.nan
+        base["sprint_top5_avg_s"] = np.nan
+        base["sprint_rep_s"] = np.nan
+        base["team_sprint_rep_s"] = np.nan
+        return base
+
+    if not laps.empty:
+        part = laps[["Driver", "Team", "lap_seconds"]].copy()
+        part["lap_seconds"] = pd.to_numeric(part["lap_seconds"], errors="coerce")
+        part = part.dropna(subset=["Driver", "Team", "lap_seconds"])
+        drv = (
+            part.groupby(["Driver", "Team"], as_index=False)
+            .agg(
+                sprint_median_s=("lap_seconds", "median"),
+                sprint_best_s=("lap_seconds", "min"),
+            )
+        )
+        top5 = (
+            part.sort_values(["Driver", "lap_seconds"])
+            .groupby("Driver", group_keys=False)
+            .head(5)
+            .groupby("Driver", as_index=False)
+            .agg(sprint_top5_avg_s=("lap_seconds", "mean"))
+        )
+        drv = drv.merge(top5, on="Driver", how="left")
+        drv["sprint_rep_s"] = (
+            0.65 * drv["sprint_top5_avg_s"].fillna(drv["sprint_median_s"])
+            + 0.35 * drv["sprint_median_s"].fillna(drv["sprint_top5_avg_s"])
+        )
+        team_rep = (
+            drv.groupby("Team", as_index=False)
+            .agg(
+                team_driver_best_rep_s=("sprint_rep_s", "min"),
+                team_driver_mean_rep_s=("sprint_rep_s", "mean"),
+            )
+        )
+        team_rep["team_sprint_rep_s"] = (
+            0.65 * team_rep["team_driver_best_rep_s"] + 0.35 * team_rep["team_driver_mean_rep_s"]
+        )
+        drv = drv.merge(team_rep[["Team", "team_sprint_rep_s"]], on="Team", how="left")
+    else:
+        drv = pd.DataFrame(
+            columns=[
+                "Driver",
+                "Team",
+                "sprint_median_s",
+                "sprint_best_s",
+                "sprint_top5_avg_s",
+                "sprint_rep_s",
+                "team_sprint_rep_s",
+            ]
+        )
+
+    merged = drv.merge(sp_res, on=["Driver", "Team"], how="outer") if not sp_res.empty else drv.copy()
+    if base.empty:
+        out = merged
+    else:
+        out = base.merge(merged, on=["Driver", "Team"], how="outer")
+    for col in [
+        "sprint_quali_position",
+        "sprint_position",
+        "sprint_median_s",
+        "sprint_best_s",
+        "sprint_top5_avg_s",
+        "sprint_rep_s",
+        "team_sprint_rep_s",
+    ]:
+        if col not in out.columns:
+            out[col] = np.nan
+    return out
+
+
 def _fill_missing_quali_positions(q_session: object, q_res: pd.DataFrame) -> pd.DataFrame:
     out = q_res.copy()
     out["quali_position"] = pd.to_numeric(out["quali_position"], errors="coerce")
@@ -471,6 +593,20 @@ def _round_feature_frame(
     feats = _practice_features(b)
     if feats.empty:
         raise RuntimeError("No usable practice lap features found for this round.")
+    sprint_feats = _sprint_features(b)
+    if not sprint_feats.empty:
+        feats = feats.merge(sprint_feats, on=["Driver", "Team"], how="left")
+    else:
+        for col in [
+            "sprint_quali_position",
+            "sprint_position",
+            "sprint_median_s",
+            "sprint_best_s",
+            "sprint_top5_avg_s",
+            "sprint_rep_s",
+            "team_sprint_rep_s",
+        ]:
+            feats[col] = np.nan
 
     q = b.sessions.get("Qualifying")
     r = b.sessions.get("Race")
@@ -527,21 +663,56 @@ def train_and_predict(
     # Qualifying prediction:
     # current weekend pace + historical qualifying priors (driver + team),
     # with extra weight for same-circuit prior
-    pace_rank = _rank_score(target.get("practice_rep_s", target["practice_median_s"]))
-    team_pace_rank = _rank_score(target.get("team_practice_rep_s", target["team_practice_median_s"]))
+    practice_rep_raw = target.get("practice_rep_s", target["practice_median_s"])
+    sprint_rep_raw = target.get("sprint_rep_s", pd.Series(np.nan, index=target.index))
+    team_practice_rep_raw = target.get("team_practice_rep_s", target["team_practice_median_s"])
+    team_sprint_rep_raw = target.get("team_sprint_rep_s", pd.Series(np.nan, index=target.index))
+    sprint_quali_raw = target.get("sprint_quali_position", pd.Series(np.nan, index=target.index))
+    sprint_pos_raw = target.get("sprint_position", pd.Series(np.nan, index=target.index))
+
+    practice_rank = _rank_score(practice_rep_raw)
+    sprint_pace_rank = _rank_score(sprint_rep_raw)
+    pace_rank = _weighted_rank_blend(
+        [
+            (practice_rep_raw, practice_rank, 0.55),
+            (sprint_rep_raw, sprint_pace_rank, 0.45),
+        ],
+        fallback=practice_rank,
+    )
+    team_practice_rank = _rank_score(team_practice_rep_raw)
+    team_sprint_rank = _rank_score(team_sprint_rep_raw)
+    team_pace_rank = _weighted_rank_blend(
+        [
+            (team_practice_rep_raw, team_practice_rank, 0.58),
+            (team_sprint_rep_raw, team_sprint_rank, 0.42),
+        ],
+        fallback=team_practice_rank,
+    )
+    sprint_quali_rank = _rank_score(sprint_quali_raw)
+    sprint_pos_rank = _rank_score(sprint_pos_raw)
     drv_q_rank = _rank_score(target["driver_prev_quali_avg"])
     team_q_rank = _rank_score(target["team_prev_quali_avg"])
     teammate_q_rank = _rank_score(target.get("driver_prev_quali_teammate_delta", pd.Series(np.nan, index=target.index)))
     drv_q_c_rank = _rank_score(target.get("driver_prev_quali_circuit", pd.Series(np.nan, index=target.index)))
     team_q_c_rank = _rank_score(target.get("team_prev_quali_circuit", pd.Series(np.nan, index=target.index)))
+    current_quali_score = _weighted_rank_blend(
+        [
+            (practice_rep_raw, practice_rank, 0.28),
+            (team_practice_rep_raw, team_practice_rank, 0.16),
+            (sprint_rep_raw, sprint_pace_rank, 0.18),
+            (team_sprint_rep_raw, team_sprint_rank, 0.10),
+            (sprint_quali_raw, sprint_quali_rank, 0.16),
+            (sprint_pos_raw, sprint_pos_rank, 0.12),
+        ],
+        fallback=0.60 * pace_rank + 0.40 * team_pace_rank,
+    )
     target["pred_quali_score"] = (
-        0.42 * pace_rank
-        + 0.26 * team_pace_rank
+        0.70 * current_quali_score
         + 0.05 * drv_q_rank
-        + 0.14 * team_q_rank
-        + 0.06 * teammate_q_rank
-        + 0.03 * drv_q_c_rank
-        + 0.07 * team_q_c_rank
+        + 0.13 * team_q_rank
+        + 0.04 * teammate_q_rank
+        + 0.02 * drv_q_c_rank
+        + 0.06 * team_q_c_rank
     )
     # Car ceiling: exceptional single-driver form should not overwhelm clear team-level pace.
     quali_team_ceiling = 0.60 * team_pace_rank + 0.40 * team_q_rank
@@ -562,15 +733,26 @@ def train_and_predict(
     teammate_r_rank = _rank_score(target.get("driver_prev_race_teammate_delta", pd.Series(np.nan, index=target.index)))
     drv_r_c_rank = _rank_score(target.get("driver_prev_race_circuit", pd.Series(np.nan, index=target.index)))
     team_r_c_rank = _rank_score(target.get("team_prev_race_circuit", pd.Series(np.nan, index=target.index)))
+    current_race_score = _weighted_rank_blend(
+        [
+            (practice_rep_raw, practice_rank, 0.12),
+            (team_practice_rep_raw, team_practice_rank, 0.06),
+            (sprint_rep_raw, sprint_pace_rank, 0.24),
+            (team_sprint_rep_raw, team_sprint_rank, 0.14),
+            (sprint_quali_raw, sprint_quali_rank, 0.12),
+            (sprint_pos_raw, sprint_pos_rank, 0.16),
+            (quali_input, quali_rank, 0.16),
+        ],
+        fallback=0.50 * pace_rank + 0.22 * team_pace_rank + 0.28 * quali_rank,
+    )
     target["pred_race_score"] = (
-        0.28 * pace_rank
-        + 0.20 * team_pace_rank
-        + 0.24 * quali_rank
+        0.73 * current_race_score
         + 0.05 * drv_r_rank
-        + 0.12 * team_r_rank
-        + 0.06 * teammate_r_rank
+        + 0.09 * team_r_rank
+        + 0.03 * teammate_r_rank
         + 0.02 * drv_r_c_rank
-        + 0.06 * team_r_c_rank
+        + 0.04 * team_r_c_rank
+        + 0.04 * quali_rank
     )
     race_team_ceiling = 0.55 * team_pace_rank + 0.30 * team_r_rank + 0.15 * team_r_c_rank
     target["pred_race_score"] = target["pred_race_score"] + 0.22 * (quali_rank - race_team_ceiling).clip(lower=0.0)
@@ -588,8 +770,8 @@ def train_and_predict(
         metrics["quali_mae"] = float((q_pred["pred_quali_position"] - q_pred["quali_position"]).abs().mean())
     if r_pred["race_position"].notna().any():
         metrics["race_mae"] = float((r_pred["pred_race_position"] - r_pred["race_position"]).abs().mean())
-    metrics["quali_model"] = "weighted_rank:practice+historical_quali(driver,team)+teammate_form+circuit_boost"
-    metrics["race_model"] = "weighted_rank:practice+quali+historical_race(driver,team)+teammate_form+circuit_boost+overtake_penalty"
+    metrics["quali_model"] = "weighted_rank:current_weekend(practice+sprint_quali+sprint)+historical_quali(driver,team)+teammate_form+circuit_boost"
+    metrics["race_model"] = "weighted_rank:current_weekend(practice+sprint_quali+sprint+quali)+historical_race(driver,team)+teammate_form+circuit_boost+overtake_penalty"
     metrics["overtake_difficulty"] = float(overtake_difficulty)
     metrics["overtake_difficulty_races_used"] = int(od_races_used)
 

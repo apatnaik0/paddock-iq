@@ -1,5 +1,15 @@
 [
   {
+    "slug": "2026_round_04",
+    "season": 2026,
+    "round_number": 4,
+    "event_name": "Miami Grand Prix",
+    "overview_path": "races/2026_round_04/index.html",
+    "updated_at_utc": "2026-05-14T21:04:43+00:00",
+    "is_current": false,
+    "status": "completed"
+  },
+  {
     "slug": "2026_round_03",
     "season": 2026,
     "round_number": 3,
