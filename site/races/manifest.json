@@ -1,5 +1,15 @@
 [
   {
+    "slug": "2026_round_05",
+    "season": 2026,
+    "round_number": 5,
+    "event_name": "Canadian Grand Prix",
+    "overview_path": "races/2026_round_05/index.html",
+    "updated_at_utc": "2026-05-25T23:19:19+00:00",
+    "is_current": true,
+    "status": "completed"
+  },
+  {
     "slug": "2026_round_04",
     "season": 2026,
     "round_number": 4,

@@ -111,6 +111,27 @@
     }
     .hl-list { margin: 0; padding-left: 20px; color: #dfe8f7; font-size: 1.05rem; }
     .hl-list li { margin: 6px 0; }
+  
+    .track-card {
+      text-align: center;
+      margin-top: 12px;
+    }
+    .track-image {
+      width: 100%;
+      max-width: 980px;
+      max-height: 460px;
+      object-fit: contain;
+      background: #f5f7fb;
+      border: 1px solid #2b3647;
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .track-caption {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+
   </style>
 </head>
 <body>
@@ -186,6 +207,13 @@
         </p>
       </article>
     </section>
+
+    <p class="section-title">Track Map</p>
+    <section class="card track-card">
+      <img class="track-image" src="https://commons.wikimedia.org/wiki/Special:FilePath/Suzuka%20circuit%20map--2005.svg" alt="Japanese Grand Prix circuit map" />
+      <p class="track-caption">Source: <a href="https://commons.wikimedia.org/wiki/File:Suzuka_circuit_map--2005.svg" target="_blank" rel="noopener noreferrer" style="color:#9ec8ff;">Wikimedia Commons | Suzuka circuit map--2005.svg</a></p>
+    </section>
+
 
     <section class="card" style="margin-top:12px;">
       <h3>Circuit Highlights</h3>

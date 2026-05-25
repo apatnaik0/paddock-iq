@@ -356,8 +356,12 @@
       {% else %}
       <p class="muted">Hybrid strategy fallback: ML unavailable, heuristic baseline active.</p>
       {% endif %}
+      {% if strategy_rows|length == 0 %}
+      <p class="muted" style="margin-top:8px;">Weekend long-run data is not available yet. Strategy Lab will populate once practice and sprint/race pace data are loaded.</p>
+      {% endif %}
     </section>
 
+    {% if strategy_rows|length > 0 %}
     <section class="section card">
       <h3>Pit Window + Stop Load Map</h3>
       <p class="hint">Pit windows and expected stop load by team.</p>
@@ -701,6 +705,7 @@
         </tbody>
       </table>
     </section>
+    {% endif %}
   </div>
   {% if ga4_measurement_id %}
   <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga4_measurement_id }}"></script>

@@ -49,6 +49,29 @@ def _event_track_notes(event_name: str) -> dict[str, list[str]]:
                 "Late-session pace spikes in qualifying are common as temperature and grip windows align.",
             ],
         }
+    if "canadian" in name or "canada" in name or "gilles villeneuve" in name:
+        return {
+            "key_overtake_zones": [
+                "The Turn 10 hairpin is the main launch point for attacks into the Casino Straight and final chicane.",
+                "The final chicane remains the highest-risk move because exit quality onto the pit straight decides whether a pass can stick.",
+                "Lap-one braking into Turns 1-2 and restart bunching into the hairpin regularly create opportunistic position changes.",
+            ],
+            "ideal_driver_characteristics": [
+                "Strong traction management out of the hairpin and final chicane to convert exits into overtaking chances.",
+                "Confidence attacking kerbs without destabilizing the rear, especially through the final sector.",
+                "Measured brake release into heavy-stop corners to avoid front locking while keeping tyre temperatures under control.",
+            ],
+            "ideal_car_characteristics": [
+                "Efficient straight-line speed with enough braking stability to attack the heavy-stop zones repeatedly.",
+                "Stable kerb ride and traction off low-speed corners to survive the chicane-heavy layout.",
+                "A compliant rear axle that can handle traction-limited exits without overheating the rears over race stints.",
+            ],
+            "track_evolution_notes": [
+                "Montreal usually gains grip sharply across the weekend because the circuit is not heavily used outside race events.",
+                "Single-lap order can swing quickly with track evolution, so late qualifying timing often matters more than raw average pace.",
+                "Race pace tends to depend more on traction, braking repeatability, and safety-car timing than headline sector peaks from Friday.",
+            ],
+        }
     return {
         "key_overtake_zones": [
             "Primary overtakes typically occur at the longest DRS-assisted braking zone.",
@@ -71,6 +94,38 @@ def _event_track_notes(event_name: str) -> dict[str, list[str]]:
             "Race stint behavior should be weighted more heavily than isolated qualifying peaks for strategy calls.",
         ],
     }
+
+
+def _event_track_map(event_name: str) -> dict[str, str] | None:
+    name = (event_name or "").strip().lower()
+    maps = {
+        "australian grand prix": {
+            "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Albert%20Park%20Circuit%202021.svg",
+            "label": "Wikimedia Commons | Albert Park Circuit 2021.svg",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Albert_Park_Circuit_2021.svg",
+        },
+        "chinese grand prix": {
+            "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Circuit%20Shanghai.svg",
+            "label": "Wikimedia Commons | Circuit Shanghai.svg",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Circuit_Shanghai.svg",
+        },
+        "japanese grand prix": {
+            "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Suzuka%20circuit%20map--2005.svg",
+            "label": "Wikimedia Commons | Suzuka circuit map--2005.svg",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Suzuka_circuit_map--2005.svg",
+        },
+        "miami grand prix": {
+            "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Hard%20Rock%20Stadium%20Circuit%202022.svg",
+            "label": "Wikimedia Commons | Hard Rock Stadium Circuit 2022.svg",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Hard_Rock_Stadium_Circuit_2022.svg",
+        },
+        "canadian grand prix": {
+            "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Circuit%20Gilles%20Villeneuve.svg",
+            "label": "Wikimedia Commons | Circuit Gilles Villeneuve.svg",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Circuit_Gilles_Villeneuve.svg",
+        },
+    }
+    return maps.get(name)
 
 
 def _turn_count_from_session(session_obj: object) -> int | None:
@@ -383,6 +438,7 @@ def build_circuit_overview(bundle: object, history_years: int = 5) -> dict[str, 
             }
 
     notes = _event_track_notes(event_name)
+    track_map = _event_track_map(event_name) or {}
 
     return {
         "turns": turns_val,
@@ -403,4 +459,7 @@ def build_circuit_overview(bundle: object, history_years: int = 5) -> dict[str, 
         "ideal_driver_characteristics": notes["ideal_driver_characteristics"],
         "ideal_car_characteristics": notes["ideal_car_characteristics"],
         "track_evolution_notes": notes["track_evolution_notes"],
+        "track_map_url": track_map.get("url"),
+        "track_map_label": track_map.get("label"),
+        "track_map_source_url": track_map.get("source_url"),
     }
