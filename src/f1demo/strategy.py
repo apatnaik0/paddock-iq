@@ -69,6 +69,7 @@ def _scheduled_race_laps(bundle: object) -> int | None:
         "australian grand prix": 58,
         "chinese grand prix": 56,
         "canadian grand prix": 70,
+        "monaco grand prix": 78,
     }
     return lap_map.get(event_name)
 

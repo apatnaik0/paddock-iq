@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PaddockIQ | 2026 Round 6</title>
+  <style>
+    :root {
+      --bg: #090c11;
+      --panel: #121720;
+      --panel-2: #171f2b;
+      --ink: #edf3ff;
+      --muted: #9db0cc;
+      --line: #2b3647;
+      --accent: #4ea1ff;
+      --accent-2: #22c55e;
+      --accent-3: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      font-size: 19px;
+      line-height: 1.45;
+      background: radial-gradient(circle at 14% 8%, #11192a 0%, var(--bg) 46%, #07090d 100%);
+      color: var(--ink);
+    }
+    .wrap { max-width: 1420px; margin: 0 auto; padding: 22px 16px 52px; }
+    .hero {
+      background: linear-gradient(145deg, #141b28 0%, #0f141d 100%);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .brand { margin: 0; color: #e9f2ff; font-size: 1.06rem; font-weight: 800; letter-spacing: 0.3px; }
+    h1 { margin: 0 0 6px; font-size: 2rem; letter-spacing: 0.2px; }
+    .muted { color: var(--muted); margin: 0; font-size: 1.08rem; }
+    .topnav { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .navbtn {
+      color: #071222;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 8px 14px;
+    }
+    .navbtn.inactive {
+      color: #dfe8f7;
+      background: #111a28;
+      border-color: #31405a;
+    }
+    .section-title { margin: 18px 2px 8px; color: #c8d9f2; font-size: 1.18rem; font-weight: 700; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 1200px) {
+      .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 800px) {
+      .grid { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    }
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .card h3 { margin: 0 0 10px; font-size: 1.16rem; }
+    .kpi {
+      font-size: 1.62rem;
+      font-weight: 800;
+      color: #e9f2ff;
+      margin: 0 0 2px;
+    }
+    .kpi-sub {
+      font-size: 1.02rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 1.08rem; }
+    th, td { text-align: left; border-bottom: 1px solid #233043; padding: 6px 4px; }
+    th { color: #bfd1ea; font-weight: 600; }
+    td { color: #dfe8f7; }
+    .num { color: var(--accent); font-weight: 700; }
+    .pos { color: var(--accent-2); font-weight: 600; }
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #30405a;
+      background: #101828;
+      color: #d7e5fc;
+      margin-right: 6px;
+      font-size: 0.96rem;
+    }
+    .hl-list { margin: 0; padding-left: 20px; color: #dfe8f7; font-size: 1.05rem; }
+    .hl-list li { margin: 6px 0; }
+    .track-card {
+      text-align: center;
+      margin-top: 12px;
+    }
+    .track-image {
+      width: 100%;
+      max-width: 980px;
+      max-height: 460px;
+      object-fit: contain;
+      background: #f5f7fb;
+      border: 1px solid #2b3647;
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .track-caption {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.98rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    
+    <section class="hero">
+      <p class="brand">PaddockIQ</p>
+      <h1>Overview</h1>
+      <p class="muted">2026 Round 6 | Monaco Grand Prix</p>
+      <div class="topnav">
+        <a class="navbtn inactive" href="../../index.html">Race Hub</a>
+        <a class="navbtn" href="index.html">Overview</a>
+        <a class="navbtn inactive" href="round.html">Weekend Analysis</a>
+        <a class="navbtn inactive" href="strategy.html">Strategy Lab</a>
+      </div>
+    </section>
+    <p class="muted" style="margin:8px 2px 0;">Historical basis: last 5 races at this round/circuit slot</p>
+
+    <p class="section-title">Circuit Profile</p>
+    <section class="grid">
+      <article class="card">
+        <h3>Turns</h3>
+        <p class="kpi">19</p>
+        <p class="kpi-sub">Unique numbered corners</p>
+      </article>
+      <article class="card">
+        <h3>Gear Changes / Lap</h3>
+        <p class="kpi">40</p>
+        <p class="kpi-sub">From fastest qualifying lap telemetry</p>
+      </article>
+      <article class="card">
+        <h3>Weekend Fastest Lap</h3>
+        <p class="kpi" style="font-size:1.22rem;">1:13.026 (HAM - FP2)</p>
+        <p class="kpi-sub">Best available lap from current weekend sessions</p>
+      </article>
+      <article class="card">
+        <h3>Historical Fastest Lap</h3>
+        <p class="kpi" style="font-size:1.22rem;">1:09.954 (NOR - 2025)</p>
+        <p class="kpi-sub">Last 5 races at this slot</p>
+      </article>
+      <article class="card">
+        <h3>Average Pit Stops</h3>
+        <p class="kpi">1.79</p>
+        <p class="kpi-sub">Per driver, historical average</p>
+      </article>
+      <article class="card">
+        <h3>SC / VSC Likelihood</h3>
+        <p class="kpi">40.0%</p>
+        <p class="kpi-sub">SC: 40.0% | VSC: 40.0%</p>
+      </article>
+      <article class="card">
+        <h3>Pit Time Saved Under SC</h3>
+        <p class="kpi">-32.25 s</p>
+        <p class="kpi-sub">Historical pit-lap loss reduction proxy</p>
+      </article>
+      <article class="card">
+        <h3>Pit Time Saved Under VSC</h3>
+        <p class="kpi">-14.58 s</p>
+        <p class="kpi-sub">Historical pit-lap loss reduction proxy</p>
+      </article>
+      <article class="card">
+        <h3>Average Pitstop Time</h3>
+        <p class="kpi">25.93 s</p>
+        <p class="kpi-sub">Pit-in to pit-out average over same-GP history</p>
+      </article>
+      <article class="card">
+        <h3>Best Driver (Car-Adjusted)</h3>
+        <p class="kpi" style="font-size:1.22rem;">VER</p>
+        <p class="kpi-sub">
+          
+          4.1 pos vs team avg (5 races)
+          
+        </p>
+      </article>
+    </section>
+
+    
+    <p class="section-title">Track Map</p>
+    <section class="card track-card">
+      <img class="track-image" src="https://commons.wikimedia.org/wiki/Special:FilePath/Monte%20Carlo%20Formula%201%20track%20map.svg" alt="Monaco Grand Prix circuit map" />
+      
+      <p class="track-caption">Source: <a href="https://commons.wikimedia.org/wiki/File:Monte_Carlo_Formula_1_track_map.svg" target="_blank" rel="noopener noreferrer" style="color:#9ec8ff;">Wikimedia Commons | Monte Carlo Formula 1 track map.svg</a></p>
+      
+    </section>
+    
+
+    <section class="card" style="margin-top:12px;">
+      <h3>Circuit Highlights</h3>
+      <ul class="hl-list">
+        <li><strong>Key Overtake Zones:</strong> The tunnel exit into Nouvelle Chicane is the clearest passing point, but it still requires a strong exit and commitment under braking. Sainte Devote can create lap-one and restart chances, while normal green-flag overtakes are rare without a major pace offset. Rascasse and Anthony Noghes usually reward pressure and mistakes more than clean overtaking moves.</li>
+        <li><strong>Ideal Driver Characteristics:</strong> High precision against the walls and the confidence to keep minimum speed through the narrowest sections. Exceptional qualifying execution, because track position is usually more valuable here than marginal race pace. Strong tyre-temperature control at low speed, especially when following traffic through the middle sector.</li>
+        <li><strong>Ideal Car Characteristics:</strong> Maximum low-speed rotation and traction rather than pure straight-line efficiency. Stable braking and kerb compliance through Swimming Pool, Rascasse, and the final corner. A predictable front end that lets the driver place the car within centimetres over repeated push laps.</li>
+        <li><strong>Track Evolution:</strong> Track evolution is usually extreme because Monaco is a street circuit and rubber builds quickly session by session. Late-session timing can transform the order, so the final representative run in FP2 often matters more than early FP1 pace. Traffic is a major distortion factor in practice and qualifying, making clean-air lap context essential.</li>
+        <li><strong>Race Control Context:</strong> SC 40.0% and VSC 40.0%; average pit-lane time is 25.93s.</li>
+      </ul>
+    </section>
+
+    <p class="section-title">Previous Winners</p>
+    <section class="card">
+      
+      <table>
+        <thead><tr><th>Season</th><th>Winner</th><th>Team</th></tr></thead>
+        <tbody>
+          
+          <tr><td>2025</td><td>NOR</td><td>McLaren</td></tr>
+          
+          <tr><td>2024</td><td>LEC</td><td>Ferrari</td></tr>
+          
+          <tr><td>2023</td><td>VER</td><td>Red Bull Racing</td></tr>
+          
+          <tr><td>2022</td><td>PER</td><td>Red Bull Racing</td></tr>
+          
+          <tr><td>2021</td><td>VER</td><td>Red Bull Racing</td></tr>
+          
+        </tbody>
+      </table>
+      
+    </section>
+
+    <p class="section-title">Predictions</p>
+    <section class="grid-two">
+      <article class="card">
+        <h3>Qualifying Prediction</h3>
+        <p class="kpi-sub">
+          <span class="pill">Uses weekend pace + current-season prior rounds (driver/team) + same-circuit boost</span>
+        </p>
+        <table>
+          <thead><tr><th>Driver</th><th>Pred</th><th>Actual</th></tr></thead>
+          <tbody>
+            
+            <tr>
+              <td>LEC</td>
+              <td class="num">1</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>HAM</td>
+              <td class="num">2</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>ANT</td>
+              <td class="num">3</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>VER</td>
+              <td class="num">4</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>RUS</td>
+              <td class="num">5</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>PIA</td>
+              <td class="num">6</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>HAD</td>
+              <td class="num">7</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>HUL</td>
+              <td class="num">8</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>GAS</td>
+              <td class="num">9</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>BOR</td>
+              <td class="num">10</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </article>
+
+      <article class="card">
+        <h3>Race Prediction</h3>
+        <p class="kpi-sub">
+          <span class="pill">Uses weekend pace + qualifying + current-season prior rounds (driver/team) + same-circuit boost</span>
+        </p>
+        <table>
+          <thead><tr><th>Driver</th><th>Pred</th><th>Actual</th></tr></thead>
+          <tbody>
+            
+            <tr>
+              <td>LEC</td>
+              <td class="num">1</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>HAM</td>
+              <td class="num">2</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>ANT</td>
+              <td class="num">3</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>VER</td>
+              <td class="num">4</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>RUS</td>
+              <td class="num">5</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>PIA</td>
+              <td class="num">6</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>HAD</td>
+              <td class="num">7</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>GAS</td>
+              <td class="num">8</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>BOR</td>
+              <td class="num">9</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+            <tr>
+              <td>BEA</td>
+              <td class="num">10</td>
+              <td class="pos">nan</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </article>
+    </section>
+  </div>
+  
+</body>
+</html>

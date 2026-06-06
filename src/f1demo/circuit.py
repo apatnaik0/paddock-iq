@@ -72,6 +72,29 @@ def _event_track_notes(event_name: str) -> dict[str, list[str]]:
                 "Race pace tends to depend more on traction, braking repeatability, and safety-car timing than headline sector peaks from Friday.",
             ],
         }
+    if "monaco" in name or "monte carlo" in name:
+        return {
+            "key_overtake_zones": [
+                "The tunnel exit into Nouvelle Chicane is the clearest passing point, but it still requires a strong exit and commitment under braking.",
+                "Sainte Devote can create lap-one and restart chances, while normal green-flag overtakes are rare without a major pace offset.",
+                "Rascasse and Anthony Noghes usually reward pressure and mistakes more than clean overtaking moves.",
+            ],
+            "ideal_driver_characteristics": [
+                "High precision against the walls and the confidence to keep minimum speed through the narrowest sections.",
+                "Exceptional qualifying execution, because track position is usually more valuable here than marginal race pace.",
+                "Strong tyre-temperature control at low speed, especially when following traffic through the middle sector.",
+            ],
+            "ideal_car_characteristics": [
+                "Maximum low-speed rotation and traction rather than pure straight-line efficiency.",
+                "Stable braking and kerb compliance through Swimming Pool, Rascasse, and the final corner.",
+                "A predictable front end that lets the driver place the car within centimetres over repeated push laps.",
+            ],
+            "track_evolution_notes": [
+                "Track evolution is usually extreme because Monaco is a street circuit and rubber builds quickly session by session.",
+                "Late-session timing can transform the order, so the final representative run in FP2 often matters more than early FP1 pace.",
+                "Traffic is a major distortion factor in practice and qualifying, making clean-air lap context essential.",
+            ],
+        }
     return {
         "key_overtake_zones": [
             "Primary overtakes typically occur at the longest DRS-assisted braking zone.",
@@ -123,6 +146,11 @@ def _event_track_map(event_name: str) -> dict[str, str] | None:
             "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Circuit%20Gilles%20Villeneuve.svg",
             "label": "Wikimedia Commons | Circuit Gilles Villeneuve.svg",
             "source_url": "https://commons.wikimedia.org/wiki/File:Circuit_Gilles_Villeneuve.svg",
+        },
+        "monaco grand prix": {
+            "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Monte%20Carlo%20Formula%201%20track%20map.svg",
+            "label": "Wikimedia Commons | Monte Carlo Formula 1 track map.svg",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Monte_Carlo_Formula_1_track_map.svg",
         },
     }
     return maps.get(name)
