@@ -1,0 +1,23 @@
+{
+  "current_round": "2026_round_07",
+  "last_checked_utc": "2026-06-14T05:07:10+00:00",
+  "last_successful_update_utc": "2026-06-14T05:07:10+00:00",
+  "races": {
+    "2026_round_07": {
+      "season": 2026,
+      "round_number": 7,
+      "event_name": "Barcelona Grand Prix",
+      "event_format": "conventional",
+      "status": "current",
+      "is_current": true,
+      "processed_sessions": [
+        "FP1",
+        "FP2",
+        "FP3",
+        "Qualifying"
+      ],
+      "last_successful_update_utc": "2026-06-14T05:07:10+00:00",
+      "last_checked_utc": "2026-06-14T05:07:10+00:00"
+    }
+  }
+}

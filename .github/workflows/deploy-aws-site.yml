@@ -1,0 +1,65 @@
+name: Deploy AWS Static Site
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "site/**"
+      - ".github/workflows/deploy-aws-site.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: aws-static-site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      STACK_NAME: PaddockIqStaticSiteStack
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_SITE_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Resolve stack outputs
+        id: stack_outputs
+        run: |
+          BUCKET_NAME=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='SiteBucketName'].OutputValue | [0]" \
+            --output text)
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks \
+            --stack-name "$STACK_NAME" \
+            --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue | [0]" \
+            --output text)
+          echo "bucket=$BUCKET_NAME" >> "$GITHUB_OUTPUT"
+          echo "distribution=$DISTRIBUTION_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Validate site output
+        run: |
+          test -f site/index.html
+
+      - name: Sync site to S3
+        run: |
+          aws s3 sync site/ "s3://${{ steps.stack_outputs.outputs.bucket }}/" \
+            --delete \
+            --cache-control "public,max-age=300"
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ steps.stack_outputs.outputs.distribution }}" \
+            --paths "/*"

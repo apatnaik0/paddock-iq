@@ -1,0 +1,9 @@
+{
+  "app": "npx ts-node --prefer-ts-exts bin/paddock-iq-infra.ts",
+  "context": {
+    "projectName": "paddock-iq",
+    "environmentName": "prod",
+    "githubRepository": "apatnaik0/paddock-iq",
+    "githubBranch": "main"
+  }
+}

@@ -51,6 +51,65 @@ def _render_home(env: Environment, races: list[dict[str, Any]]) -> None:
     )
 
 
+def update_race_manifest(
+    *,
+    season: int,
+    round_number: int,
+    event_name: str,
+    is_current: bool,
+    status: str,
+    updated_at_utc: str | None = None,
+) -> list[dict[str, Any]]:
+    round_slug = f"{season}_round_{round_number:02d}"
+    manifest = _load_manifest()
+    rows: list[dict[str, Any]] = []
+    found = False
+    for race in manifest:
+        row = dict(race)
+        if str(row.get("slug", "")) == round_slug:
+            found = True
+            row.update(
+                {
+                    "slug": round_slug,
+                    "season": int(season),
+                    "round_number": int(round_number),
+                    "event_name": str(event_name),
+                    "overview_path": f"races/{round_slug}/index.html",
+                    "updated_at_utc": updated_at_utc
+                    or datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                    "is_current": bool(is_current),
+                    "status": str(status),
+                }
+            )
+        elif is_current:
+            row["is_current"] = False
+            if str(row.get("status", "")).lower() == "current":
+                row["status"] = "completed"
+        rows.append(row)
+    if not found:
+        rows.append(
+            {
+                "slug": round_slug,
+                "season": int(season),
+                "round_number": int(round_number),
+                "event_name": str(event_name),
+                "overview_path": f"races/{round_slug}/index.html",
+                "updated_at_utc": updated_at_utc
+                or datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "is_current": bool(is_current),
+                "status": str(status),
+            }
+        )
+    rows = sorted(
+        rows,
+        key=lambda r: (int(r.get("season", 0)), int(r.get("round_number", 0))),
+        reverse=True,
+    )
+    _save_manifest(rows)
+    _render_home(_env(), rows)
+    return rows
+
+
 def render_site(context: dict[str, Any], round_slug: str) -> Path:
     ensure_dirs(PATHS.site)
     env = _env()

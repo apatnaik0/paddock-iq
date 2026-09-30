@@ -39,6 +39,40 @@ def _canonical_session_name(label: str) -> str | None:
     return mapping.get(str(label).strip())
 
 
+def _known_driver_team_map() -> dict[str, str]:
+    mapping: dict[str, str] = {}
+    summary_paths = [
+        *PATHS.tables.glob("2026_round_*/*_summary.csv"),
+        *(PATHS.site / "races").glob("2026_round_*/outputs/*_summary.csv"),
+    ]
+    for summary in sorted(summary_paths):
+        try:
+            df = pd.read_csv(summary, usecols=["Driver", "Team"])
+        except Exception:
+            continue
+        for driver, team in df.dropna(subset=["Driver", "Team"]).itertuples(index=False):
+            driver_s = str(driver).strip()
+            team_s = str(team).strip()
+            if driver_s and team_s and team_s.lower() != "nan":
+                mapping[driver_s] = team_s
+    return mapping
+
+
+def _fill_blank_teams(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty or "Driver" not in df.columns:
+        return df
+    if "Team" not in df.columns:
+        df["Team"] = pd.NA
+    blank = df["Team"].isna() | df["Team"].astype(str).str.strip().eq("")
+    if not blank.any():
+        return df
+    team_map = _known_driver_team_map()
+    if not team_map:
+        return df
+    df.loc[blank, "Team"] = df.loc[blank, "Driver"].astype(str).map(team_map)
+    return df
+
+
 def _session_order_for_event(season: int, round_number: int) -> tuple[str, str, list[str]]:
     try:
         event = fastf1.get_event(season, round_number)
@@ -58,6 +92,10 @@ def _session_order_for_event(season: int, round_number: int) -> tuple[str, str, 
         return event_name, event_format, list(fallback)
     except Exception:
         return "", "", list(STANDARD_SESSION_ORDER)
+
+
+def event_session_order(season: int, round_number: int) -> tuple[str, str, list[str]]:
+    return _session_order_for_event(season, round_number)
 
 
 def load_sessions(
@@ -130,6 +168,7 @@ def laps_object_to_dataframe(laps: pd.DataFrame, session_name: str) -> pd.DataFr
     available = [c for c in cols if c in laps.columns]
     df = laps[available].copy()
     df["session"] = session_name
+    df = _fill_blank_teams(df)
 
     if "LapTime" in df.columns:
         df["lap_seconds"] = df["LapTime"].dt.total_seconds()
@@ -187,6 +226,7 @@ def results_dataframe(session_obj: object, session_name: str) -> pd.DataFrame:
     out = res[available].copy()
     out["session"] = session_name
     out = out.rename(columns={"Abbreviation": "Driver", "TeamName": "Team"})
+    out = _fill_blank_teams(out)
 
     return out
 

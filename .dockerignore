@@ -1,0 +1,19 @@
+.git
+.github
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.idea
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Runtime/cache artifacts should be mounted or regenerated, not baked into the image.
+data/cache
+outputs
+
+# Keep committed static site output in the image for serve mode.
+!site

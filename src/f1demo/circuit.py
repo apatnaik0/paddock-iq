@@ -95,6 +95,29 @@ def _event_track_notes(event_name: str) -> dict[str, list[str]]:
                 "Traffic is a major distortion factor in practice and qualifying, making clean-air lap context essential.",
             ],
         }
+    if "barcelona" in name or "spanish" in name or "catalunya" in name:
+        return {
+            "key_overtake_zones": [
+                "Turn 1 after the main straight is the primary DRS-assisted passing point and the clearest place to convert straight-line speed into track position.",
+                "Turn 10 creates secondary braking-zone pressure, especially when a driver exits Turn 9 well and carries deployment down the back straight.",
+                "Turns 3 and 9 are not classic passing zones, but they decide whether a following car can stay close enough to attack at the next braking phase.",
+            ],
+            "ideal_driver_characteristics": [
+                "Precise high-speed commitment through Turns 3 and 9 without overheating the front tyres.",
+                "Strong tyre management over long loaded corners, because Barcelona punishes sliding and sustained front-left stress.",
+                "Clean qualifying execution, since dirty air in the long corners can make race overtaking harder than the DRS zones suggest.",
+            ],
+            "ideal_car_characteristics": [
+                "High aerodynamic efficiency with enough downforce to keep minimum speed through the long radius corners.",
+                "Stable front-end platform through sustained lateral load, especially in Sector 1 and the fast Turn 9 approach.",
+                "Good tyre thermal control and traction out of slower corners so the car can protect stint pace without sacrificing DRS defense.",
+            ],
+            "track_evolution_notes": [
+                "Barcelona is highly setup-sensitive, so practice gaps can reflect aero load, engine mode, and fuel choices as much as outright pace.",
+                "Wind direction can change balance across the lap, making same-session run timing important when comparing driver deltas.",
+                "Long-run degradation is usually more predictive here than isolated one-lap pace because the circuit loads tyres heavily across multiple corner types.",
+            ],
+        }
     return {
         "key_overtake_zones": [
             "Primary overtakes typically occur at the longest DRS-assisted braking zone.",
@@ -151,6 +174,16 @@ def _event_track_map(event_name: str) -> dict[str, str] | None:
             "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Monte%20Carlo%20Formula%201%20track%20map.svg",
             "label": "Wikimedia Commons | Monte Carlo Formula 1 track map.svg",
             "source_url": "https://commons.wikimedia.org/wiki/File:Monte_Carlo_Formula_1_track_map.svg",
+        },
+        "barcelona grand prix": {
+            "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Formula1%20Circuit%20Catalunya.svg",
+            "label": "Wikimedia Commons | Formula1 Circuit Catalunya.svg",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Formula1_Circuit_Catalunya.svg",
+        },
+        "spanish grand prix": {
+            "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Formula1%20Circuit%20Catalunya.svg",
+            "label": "Wikimedia Commons | Formula1 Circuit Catalunya.svg",
+            "source_url": "https://commons.wikimedia.org/wiki/File:Formula1_Circuit_Catalunya.svg",
         },
     }
     return maps.get(name)

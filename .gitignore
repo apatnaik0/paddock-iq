@@ -8,3 +8,13 @@ outputs/
 
 # Keep built site for publishing
 # site/
+
+# Node/CDK infrastructure artifacts
+node_modules/
+infra/aws-cdk/cdk.out/
+infra/aws-cdk/*.js
+infra/aws-cdk/*.d.ts
+infra/aws-cdk/bin/*.js
+infra/aws-cdk/bin/*.d.ts
+infra/aws-cdk/lib/*.js
+infra/aws-cdk/lib/*.d.ts

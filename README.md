@@ -25,6 +25,89 @@ Outputs:
 - `outputs/` -> CSV/JSON summaries, plots, model artifacts
 - `site/` -> static website files (`index.html` is the Race Hub)
 
+## 2a) Automatic current-race update
+
+Phase 1 automation is available through:
+
+```bash
+python -m src.f1demo.auto_update --season 2026 --quick
+```
+
+What it does:
+- Detects the current/next race from the FastF1 calendar.
+- Detects which sessions have usable lap data.
+- Skips cleanly when no new session data is available.
+- Regenerates the race pages only when new data is detected or `--force` is used.
+- Tracks processed sessions in `site/races/state.json`.
+- Keeps `site/races/manifest.json` aligned with the current/completed race state.
+
+Useful options:
+
+```bash
+python -m src.f1demo.auto_update --season 2026 --dry-run
+python -m src.f1demo.auto_update --season 2026 --round 7 --force --quick
+python -m src.f1demo.auto_update --season 2026 --no-complete-after-race
+```
+
+## 2b) Dockerized pipeline
+
+Phase 2 adds a container entrypoint so the same update logic can run locally, in CI, or later in ECS Fargate.
+
+Build:
+
+```bash
+docker build -t paddock-iq-pipeline .
+```
+
+Automatic current-race update:
+
+```bash
+docker run --rm \
+  -e SEASON=2026 \
+  -e QUICK=true \
+  paddock-iq-pipeline
+```
+
+Dry run without regenerating files:
+
+```bash
+docker run --rm \
+  -e SEASON=2026 \
+  -e DRY_RUN=true \
+  paddock-iq-pipeline
+```
+
+Manual fixed-round pipeline run:
+
+```bash
+docker run --rm \
+  -e PADDOCK_MODE=pipeline \
+  -e SEASON=2026 \
+  -e ROUND=7 \
+  -e QUICK=true \
+  paddock-iq-pipeline
+```
+
+Serve the committed static site from the container:
+
+```bash
+docker run --rm -p 8000:8000 \
+  -e PADDOCK_MODE=serve \
+  paddock-iq-pipeline
+```
+
+Useful container environment variables:
+- `PADDOCK_MODE`: `auto` (default), `pipeline`, or `serve`
+- `SEASON`: season year, defaults to current UTC year
+- `ROUND`: optional in `auto`, required in `pipeline`
+- `TRAIN_ROUND_END`: training backfill round, defaults to `2`
+- `QUICK`: `true` by default for faster cloud/runtime updates
+- `FORCE_UPDATE`: force regeneration in `auto` mode
+- `DRY_RUN`: detect available sessions without writing site/state files
+- `MIN_LAPS`, `MIN_DRIVERS`, `LOOKAHEAD_DAYS`: session availability thresholds
+- `NO_COMPLETE_AFTER_RACE`: keep a race marked current even when race data exists
+- `PADDOCK_GA4_MEASUREMENT_ID`: optional GA4 analytics ID
+
 ## 3) View local website
 
 ```bash
@@ -63,4 +146,43 @@ Or set once as an env var:
 ```bash
 export PADDOCK_GA4_MEASUREMENT_ID=G-XXXXXXXXXX
 python -m src.f1demo.pipeline --season 2025 --round 1 --quick
+```
+
+## 6) AWS Static Hosting (Phase 3)
+
+Phase 3 hosts the committed static `site/` output on AWS using CDK TypeScript:
+
+- private S3 bucket
+- CloudFront CDN
+- CloudFront Origin Access Control
+- GitHub Actions OIDC deploy role
+
+Install and synthesize:
+
+```bash
+cd infra/aws-cdk
+npm install
+AWS_PROFILE=paddockiq npx cdk synth
+```
+
+Deploy infrastructure:
+
+```bash
+AWS_PROFILE=paddockiq npx cdk deploy \
+  -c projectName=paddock-iq \
+  -c environmentName=prod \
+  -c githubRepository=apatnaik0/paddock-iq \
+  -c githubBranch=main
+```
+
+Deploy the current local `site/` folder manually:
+
+```bash
+AWS_PROFILE=paddockiq ./scripts/deploy_site_to_s3.sh
+```
+
+After CDK deploys, add the `GitHubDeployRoleArn` stack output as a GitHub repository secret named:
+
+```text
+AWS_SITE_DEPLOY_ROLE_ARN
 ```

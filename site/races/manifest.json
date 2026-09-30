@@ -1,13 +1,23 @@
 [
   {
+    "slug": "2026_round_07",
+    "season": 2026,
+    "round_number": 7,
+    "event_name": "Barcelona Grand Prix",
+    "overview_path": "races/2026_round_07/index.html",
+    "updated_at_utc": "2026-06-14T05:07:10+00:00",
+    "is_current": true,
+    "status": "current"
+  },
+  {
     "slug": "2026_round_06",
     "season": 2026,
     "round_number": 6,
     "event_name": "Monaco Grand Prix",
     "overview_path": "races/2026_round_06/index.html",
     "updated_at_utc": "2026-06-06T05:00:46+00:00",
-    "is_current": true,
-    "status": "current"
+    "is_current": false,
+    "status": "completed"
   },
   {
     "slug": "2026_round_05",

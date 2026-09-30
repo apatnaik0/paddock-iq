@@ -1,0 +1,25 @@
+{
+  "name": "paddock-iq-aws-cdk",
+  "version": "0.1.0",
+  "private": true,
+  "bin": {
+    "paddock-iq-infra": "bin/paddock-iq-infra.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "synth": "cdk synth",
+    "deploy": "cdk deploy",
+    "diff": "cdk diff"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.214.0",
+    "constructs": "^10.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
