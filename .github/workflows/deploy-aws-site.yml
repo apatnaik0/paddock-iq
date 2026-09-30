@@ -28,13 +28,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check AWS deploy secret
+        id: aws_secret
+        env:
+          ROLE_ARN: ${{ secrets.AWS_SITE_DEPLOY_ROLE_ARN }}
+        run: |
+          if [ -z "$ROLE_ARN" ]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "AWS_SITE_DEPLOY_ROLE_ARN is not configured; skipping AWS deploy."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Configure AWS credentials
+        if: steps.aws_secret.outputs.configured == 'true'
         uses: aws-actions/configure-aws-credentials@v5
         with:
           role-to-assume: ${{ secrets.AWS_SITE_DEPLOY_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Resolve stack outputs
+        if: steps.aws_secret.outputs.configured == 'true'
         id: stack_outputs
         run: |
           BUCKET_NAME=$(aws cloudformation describe-stacks \
@@ -49,16 +63,19 @@ jobs:
           echo "distribution=$DISTRIBUTION_ID" >> "$GITHUB_OUTPUT"
 
       - name: Validate site output
+        if: steps.aws_secret.outputs.configured == 'true'
         run: |
           test -f site/index.html
 
       - name: Sync site to S3
+        if: steps.aws_secret.outputs.configured == 'true'
         run: |
           aws s3 sync site/ "s3://${{ steps.stack_outputs.outputs.bucket }}/" \
             --delete \
             --cache-control "public,max-age=300"
 
       - name: Invalidate CloudFront
+        if: steps.aws_secret.outputs.configured == 'true'
         run: |
           aws cloudfront create-invalidation \
             --distribution-id "${{ steps.stack_outputs.outputs.distribution }}" \

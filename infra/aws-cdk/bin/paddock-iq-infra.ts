@@ -10,6 +10,11 @@ const githubRepository = app.node.tryGetContext('githubRepository') ?? 'apatnaik
 const githubBranch = app.node.tryGetContext('githubBranch') ?? 'main';
 const enableCloudFrontContext = app.node.tryGetContext('enableCloudFront') ?? 'false';
 const enableCloudFront = String(enableCloudFrontContext).toLowerCase() === 'true';
+const enablePipelineScheduleContext = app.node.tryGetContext('enablePipelineSchedule') ?? 'false';
+const enablePipelineSchedule = String(enablePipelineScheduleContext).toLowerCase() === 'true';
+const pipelineScheduleExpression = app.node.tryGetContext('pipelineScheduleExpression') ?? 'cron(0 6,12,18,23 ? * FRI,SAT,SUN *)';
+const pipelineImageTag = app.node.tryGetContext('pipelineImageTag') ?? 'latest';
+const pipelineSeason = String(app.node.tryGetContext('pipelineSeason') ?? new Date().getUTCFullYear());
 
 new StaticSiteStack(app, 'PaddockIqStaticSiteStack', {
   env: {
@@ -21,4 +26,8 @@ new StaticSiteStack(app, 'PaddockIqStaticSiteStack', {
   githubRepository,
   githubBranch,
   enableCloudFront,
+  enablePipelineSchedule,
+  pipelineScheduleExpression,
+  pipelineImageTag,
+  pipelineSeason,
 });

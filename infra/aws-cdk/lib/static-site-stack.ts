@@ -1,7 +1,13 @@
 import * as cdk from 'aws-cdk-lib';
 import { CfnOutput, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as ecr from 'aws-cdk-lib/aws-ecr';
+import * as ecs from 'aws-cdk-lib/aws-ecs';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as logs from 'aws-cdk-lib/aws-logs';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
@@ -11,6 +17,10 @@ export interface StaticSiteStackProps extends StackProps {
   githubRepository: string;
   githubBranch: string;
   enableCloudFront: boolean;
+  enablePipelineSchedule: boolean;
+  pipelineScheduleExpression: string;
+  pipelineImageTag: string;
+  pipelineSeason: string;
 }
 
 export class StaticSiteStack extends Stack {
@@ -141,6 +151,102 @@ export class StaticSiteStack extends Stack {
       }),
     );
 
+    const pipelineRepository = new ecr.Repository(this, 'PipelineImageRepository', {
+      repositoryName: `${normalizedProject}-pipeline-${normalizedEnv}`,
+      imageScanOnPush: true,
+      removalPolicy: RemovalPolicy.RETAIN,
+      lifecycleRules: [
+        {
+          description: 'Keep the latest pipeline images only',
+          maxImageCount: 5,
+        },
+      ],
+    });
+
+    const pipelineVpc = new ec2.Vpc(this, 'PipelineVpc', {
+      maxAzs: 2,
+      natGateways: 0,
+      subnetConfiguration: [
+        {
+          name: 'public',
+          subnetType: ec2.SubnetType.PUBLIC,
+        },
+      ],
+    });
+
+    const pipelineCluster = new ecs.Cluster(this, 'PipelineCluster', {
+      clusterName: `${props.projectName}-${props.environmentName}-pipeline`,
+      vpc: pipelineVpc,
+    });
+
+    const pipelineLogGroup = new logs.LogGroup(this, 'PipelineLogGroup', {
+      logGroupName: `/aws/ecs/${props.projectName}/${props.environmentName}/pipeline`,
+      retention: logs.RetentionDays.ONE_MONTH,
+      removalPolicy: RemovalPolicy.DESTROY,
+    });
+
+    const pipelineTask = new ecs.FargateTaskDefinition(this, 'PipelineTaskDefinition', {
+      family: `${props.projectName}-${props.environmentName}-pipeline`,
+      cpu: 512,
+      memoryLimitMiB: 2048,
+      ephemeralStorageGiB: 40,
+    });
+
+    pipelineTask.addToTaskRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['s3:ListBucket'],
+        resources: [siteBucket.bucketArn],
+      }),
+    );
+    pipelineTask.addToTaskRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject'],
+        resources: [siteBucket.arnForObjects('*')],
+      }),
+    );
+    pipelineTask.addToTaskRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['cloudfront:CreateInvalidation'],
+        resources: [`arn:aws:cloudfront::${this.account}:distribution/${distribution.ref}`],
+      }),
+    );
+
+    pipelineTask.addContainer('PipelineContainer', {
+      containerName: 'pipeline',
+      image: ecs.ContainerImage.fromEcrRepository(pipelineRepository, props.pipelineImageTag),
+      logging: ecs.LogDrivers.awsLogs({
+        streamPrefix: 'pipeline',
+        logGroup: pipelineLogGroup,
+      }),
+      environment: {
+        PADDOCK_MODE: 'auto',
+        SEASON: props.pipelineSeason,
+        QUICK: 'true',
+        SITE_BUCKET_NAME: siteBucket.bucketName,
+        CLOUDFRONT_DISTRIBUTION_ID: distribution.ref,
+        AWS_REGION: Stack.of(this).region,
+      },
+    });
+
+    const pipelineSchedule = new events.Rule(this, 'PipelineSchedule', {
+      ruleName: `${props.projectName}-${props.environmentName}-pipeline-schedule`,
+      description: 'Runs the PaddockIQ race-weekend update container. Disabled unless explicitly enabled in CDK context.',
+      schedule: events.Schedule.expression(props.pipelineScheduleExpression),
+      enabled: props.enablePipelineSchedule,
+    });
+
+    pipelineSchedule.addTarget(
+      new targets.EcsTask({
+        cluster: pipelineCluster,
+        taskDefinition: pipelineTask,
+        taskCount: 1,
+        assignPublicIp: true,
+        subnetSelection: {
+          subnetType: ec2.SubnetType.PUBLIC,
+        },
+      }),
+    );
+
     new CfnOutput(this, 'SiteBucketName', {
       value: siteBucket.bucketName,
       description: 'Private S3 bucket that stores the generated static site',
@@ -160,6 +266,18 @@ export class StaticSiteStack extends Stack {
     new CfnOutput(this, 'GitHubDeployRoleArn', {
       value: deployRole.roleArn,
       description: 'GitHub Actions role ARN for static site deployments',
+    });
+    new CfnOutput(this, 'PipelineImageRepositoryUri', {
+      value: pipelineRepository.repositoryUri,
+      description: 'ECR repository URI for the scheduled pipeline container image',
+    });
+    new CfnOutput(this, 'PipelineClusterName', {
+      value: pipelineCluster.clusterName,
+      description: 'ECS cluster used by the race-weekend update pipeline',
+    });
+    new CfnOutput(this, 'PipelineScheduleEnabled', {
+      value: props.enablePipelineSchedule ? 'true' : 'false',
+      description: 'Whether the EventBridge pipeline schedule is enabled by CDK config',
     });
   }
 }

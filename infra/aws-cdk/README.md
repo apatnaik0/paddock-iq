@@ -7,12 +7,19 @@ This CDK app creates the Phase 3 static hosting layer:
 - CloudFront Origin Access Control (OAC)
 - S3 bucket policy that only allows CloudFront reads
 - GitHub Actions OIDC deploy role scoped to `apatnaik0/paddock-iq` on `main`
+- ECR repository for the future automated pipeline container
+- ECS/Fargate cluster and task definition for the race-weekend updater
+- Disabled EventBridge schedule for automated session checks
+- CloudWatch log group for pipeline runs
 
 CloudFront is controlled by the `enableCloudFront` CDK context value. It defaults to
 `false` so a normal synth or deploy will keep the public distribution paused unless
-you explicitly opt in.
+you explicitly opt in. The pipeline schedule is controlled separately by
+`enablePipelineSchedule`, which also defaults to `false`.
 
-It does not run the FastF1 data pipeline. That comes in Phase 4.
+The scheduled pipeline infrastructure is present but paused by default. It does not
+run FastF1 jobs unless `enablePipelineSchedule=true` is deployed and a container
+image has been pushed to ECR.
 
 ## Prerequisites
 
@@ -48,7 +55,8 @@ AWS_PROFILE=paddockiq npx cdk deploy \
   -c environmentName=prod \
   -c githubRepository=apatnaik0/paddock-iq \
   -c githubBranch=main \
-  -c enableCloudFront=false
+  -c enableCloudFront=false \
+  -c enablePipelineSchedule=false
 ```
 
 Deploy with CloudFront enabled:
@@ -59,7 +67,8 @@ AWS_PROFILE=paddockiq npx cdk deploy \
   -c environmentName=prod \
   -c githubRepository=apatnaik0/paddock-iq \
   -c githubBranch=main \
-  -c enableCloudFront=true
+  -c enableCloudFront=true \
+  -c enablePipelineSchedule=false
 ```
 
 After deployment, note these outputs:
@@ -69,6 +78,9 @@ After deployment, note these outputs:
 - `SiteBucketName`
 - `CloudFrontDistributionId`
 - `CloudFrontEnabled`
+- `PipelineImageRepositoryUri`
+- `PipelineClusterName`
+- `PipelineScheduleEnabled`
 
 ## GitHub Actions OIDC Setup
 
@@ -79,9 +91,8 @@ AWS_SITE_DEPLOY_ROLE_ARN=<GitHubDeployRoleArn output value>
 ```
 
 The workflow `.github/workflows/deploy-aws-site.yml` uses this role to sync `site/` to S3 and invalidate CloudFront.
-If this secret is missing, the GitHub Actions deploy is expected to fail at the AWS
-credentials step. That does not affect local site generation or the committed site
-files.
+If this secret is missing, the workflow skips the AWS deploy steps cleanly. That
+does not affect local site generation or the committed site files.
 
 ## Pause / Resume Public Hosting
 
@@ -93,7 +104,8 @@ AWS_PROFILE=paddockiq npx cdk deploy \
   -c environmentName=prod \
   -c githubRepository=apatnaik0/paddock-iq \
   -c githubBranch=main \
-  -c enableCloudFront=false
+  -c enableCloudFront=false \
+  -c enablePipelineSchedule=false
 ```
 
 To resume public hosting:
@@ -104,8 +116,54 @@ AWS_PROFILE=paddockiq npx cdk deploy \
   -c environmentName=prod \
   -c githubRepository=apatnaik0/paddock-iq \
   -c githubBranch=main \
-  -c enableCloudFront=true
+  -c enableCloudFront=true \
+  -c enablePipelineSchedule=false
 ```
+
+## Pipeline Automation Skeleton
+
+The Phase 4 skeleton creates the AWS resources needed to run the Dockerized
+pipeline later:
+
+- ECR repo: stores the PaddockIQ pipeline image
+- ECS cluster: serverless Fargate execution environment
+- Fargate task definition: runs the existing Docker entrypoint in `PADDOCK_MODE=auto`
+- EventBridge rule: scheduled trigger, disabled unless explicitly enabled
+- CloudWatch logs: stores container logs for debugging pipeline runs
+
+The VPC uses public subnets and no NAT gateways. This keeps idle cost low because
+NAT gateways are one of the easiest ways to accidentally create always-on charges.
+
+Build and push the pipeline image after the stack exists:
+
+```bash
+AWS_PROFILE=paddockiq ./scripts/push_pipeline_image_to_ecr.sh
+```
+
+Enable scheduled checks only when ready:
+
+```bash
+AWS_PROFILE=paddockiq npx cdk deploy \
+  -c projectName=paddock-iq \
+  -c environmentName=prod \
+  -c githubRepository=apatnaik0/paddock-iq \
+  -c githubBranch=main \
+  -c enableCloudFront=true \
+  -c enablePipelineSchedule=true \
+  -c pipelineSeason=2026
+```
+
+The default schedule is:
+
+```text
+cron(0 6,12,18,23 ? * FRI,SAT,SUN *)
+```
+
+Override it with `-c pipelineScheduleExpression='<eventbridge expression>'`.
+
+Current limitation: the Fargate task can run the auto-update pipeline, but the
+cloud-run publish step still needs to be implemented before fully enabling the
+schedule. Until then, keep `enablePipelineSchedule=false` for production use.
 
 ## Local Deploy
 
