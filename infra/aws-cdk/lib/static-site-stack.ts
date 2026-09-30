@@ -10,6 +10,7 @@ export interface StaticSiteStackProps extends StackProps {
   environmentName: string;
   githubRepository: string;
   githubBranch: string;
+  enableCloudFront: boolean;
 }
 
 export class StaticSiteStack extends Stack {
@@ -42,7 +43,7 @@ export class StaticSiteStack extends Stack {
 
     const distribution = new cloudfront.CfnDistribution(this, 'SiteDistribution', {
       distributionConfig: {
-        enabled: true,
+        enabled: props.enableCloudFront,
         comment: `${props.projectName} ${props.environmentName} static site`,
         defaultRootObject: 'index.html',
         httpVersion: 'http2and3',
@@ -151,6 +152,10 @@ export class StaticSiteStack extends Stack {
     new CfnOutput(this, 'CloudFrontDomainName', {
       value: distribution.attrDomainName,
       description: 'Public CloudFront domain name for the dashboard',
+    });
+    new CfnOutput(this, 'CloudFrontEnabled', {
+      value: props.enableCloudFront ? 'true' : 'false',
+      description: 'Whether the CloudFront distribution is enabled by the CDK config',
     });
     new CfnOutput(this, 'GitHubDeployRoleArn', {
       value: deployRole.roleArn,

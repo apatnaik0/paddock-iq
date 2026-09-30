@@ -8,6 +8,8 @@ const projectName = app.node.tryGetContext('projectName') ?? 'paddock-iq';
 const environmentName = app.node.tryGetContext('environmentName') ?? 'prod';
 const githubRepository = app.node.tryGetContext('githubRepository') ?? 'apatnaik0/paddock-iq';
 const githubBranch = app.node.tryGetContext('githubBranch') ?? 'main';
+const enableCloudFrontContext = app.node.tryGetContext('enableCloudFront') ?? 'false';
+const enableCloudFront = String(enableCloudFrontContext).toLowerCase() === 'true';
 
 new StaticSiteStack(app, 'PaddockIqStaticSiteStack', {
   env: {
@@ -18,4 +20,5 @@ new StaticSiteStack(app, 'PaddockIqStaticSiteStack', {
   environmentName,
   githubRepository,
   githubBranch,
+  enableCloudFront,
 });
